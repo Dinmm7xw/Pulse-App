@@ -41,6 +41,8 @@
     overflow-y: auto;
     scroll-snap-type: y mandatory;
     scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
 }
 
 .feed-scroll-content::-webkit-scrollbar {
@@ -51,8 +53,8 @@
 .feed-scroll-content.threads-layout {
     scroll-snap-type: none;
     padding-top: 80px;
-    padding-bottom: 100px;
-    background: #000;
+    padding-bottom: 90px;
+    background: var(--bg-color);
 }
 
 .feed-scroll-content.full-layout {
