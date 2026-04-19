@@ -258,6 +258,21 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
         }
     };
 
+    // Cleanup audio on modal close
+    useEffect(() => {
+        if (!isOpen && audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current = null;
+            setIsAudioPlaying(false);
+        }
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+        };
+    }, [isOpen]);
+
     useEffect(() => {
         return () => {
             if (audioRef.current) {
@@ -347,8 +362,10 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                                         <div className="capture-row">
                                             <label className="gallery-preview glass"><Camera size={20} /><input type="file" hidden accept="image/*,video/*" onChange={handleGalleryUpload} /></label>
                                             <div className={`capture-btn-outer ${isRecording ? 'recording' : ''}`} 
-                                                 onMouseDown={() => mediaType === 'video' && startRecording()}
-                                                 onMouseUp={() => mediaType === 'video' && stopRecording()}
+                                                 onTouchStart={() => mediaType === 'video' && startRecording()}
+                                                 onTouchEnd={() => mediaType === 'video' && stopRecording()}
+                                                 onMouseDown={() => (window.innerWidth > 768 && mediaType === 'video') && startRecording()}
+                                                 onMouseUp={() => (window.innerWidth > 768 && mediaType === 'video') && stopRecording()}
                                                  onClick={() => mediaType === 'image' && capturePhoto()}><div className="capture-btn-inner"></div></div>
                                             <div className="filter-preview glass" onClick={cycleFilter}>✨</div>
                                         </div>

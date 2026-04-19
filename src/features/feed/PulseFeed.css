@@ -59,6 +59,7 @@
 
 .feed-scroll-content.full-layout {
     height: 100%;
+    padding-bottom: 70px; /* Shift content up to avoid being under nav */
 }
 
 /* Full Layout Item (TikTok style) */
@@ -78,14 +79,19 @@
 
 .feed-overlay {
     position: absolute;
-    bottom: 0;
+    bottom: 80px; /* Move up above nav bar */
     left: 0;
     right: 0;
-    padding: 20px;
+    padding: 0 20px;
     background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+    pointer-events: none; /* Allow passthrough for scrolling if needed */
+}
+
+.post-info, .post-actions {
+    pointer-events: auto; /* Re-enable for buttons and text */
 }
 
 .post-info {

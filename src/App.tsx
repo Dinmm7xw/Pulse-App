@@ -14,12 +14,12 @@ import { SettingsView } from './features/profile/SettingsView';
 import { getCityName } from './lib/geo';
 import { Loader2 } from 'lucide-react';
 
-function App() {
   const [user, setUser] = useState<any>(null);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [activeTab, setActiveTab] = useState('map');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [refreshProfile, setRefreshProfile] = useState(0); // Dummy state to force check
   const { posts, addPost, userLocation, userProfile } = usePulseStore();
 
   useEffect(() => {
@@ -29,6 +29,9 @@ function App() {
     });
     return () => unsubscribe();
   }, []);
+
+  // Extra guard: If user has a username, they ARE complete even if flag is missing
+  const isProfileSetupFinished = userProfile?.isProfileComplete || (userProfile?.username && userProfile.username.length > 2);
 
   if (isAuthChecking) {
       return (
@@ -43,8 +46,8 @@ function App() {
   }
 
   // Onboarding logic: check if profile is complete
-  if (user && !userProfile?.isProfileComplete) {
-      return <CompleteProfileView onComplete={() => {}} initialEmail={user.email} />;
+  if (user && !isProfileSetupFinished) {
+      return <CompleteProfileView onComplete={() => setRefreshProfile(prev => prev + 1)} initialEmail={user.email} />;
   }
 
   const handlePublish = async (postData: {
