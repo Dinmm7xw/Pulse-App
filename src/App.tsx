@@ -1,0 +1,112 @@
+import { useEffect, useState } from 'react';
+import { auth } from './lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { AppLayout } from './components/AppLayout';
+import { MapView } from './features/map/MapView';
+import { PulseFeed } from './features/feed/PulseFeed';
+import { ChatView } from './features/chat/ChatView';
+import { ProfileView } from './features/profile/ProfileView';
+import { CreatePostModal } from './features/feed/CreatePostModal';
+import { usePulseStore } from './store/useStore';
+import { LoginView } from './features/auth/LoginView';
+import { CompleteProfileView } from './features/auth/CompleteProfileView';
+import { SettingsView } from './features/profile/SettingsView';
+import { getCityName } from './lib/geo';
+import { Loader2 } from 'lucide-react';
+
+function App() {
+  const [user, setUser] = useState<any>(null);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const [activeTab, setActiveTab] = useState('map');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { posts, addPost, userLocation, userProfile } = usePulseStore();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setIsAuthChecking(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  if (isAuthChecking) {
+      return (
+          <div style={{ height: '100vh', background: 'var(--bg-color)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <Loader2 className="spin" size={40} color="var(--primary-color)" />
+          </div>
+      );
+  }
+
+  if (!user) {
+    return <LoginView onLogin={() => {}} />;
+  }
+
+  // Onboarding logic: check if profile is complete
+  if (user && !userProfile?.isProfileComplete) {
+      return <CompleteProfileView onComplete={() => {}} initialEmail={user.email} />;
+  }
+
+  const handlePublish = async (postData: {
+    text: string;
+    isAnonymous: boolean;
+    mediaUrl?: string;
+    hashtags?: string[];
+    privacy?: string;
+    audioUrl?: string;
+    audioName?: string;
+  }) => {
+    let city = 'Алматы';
+    if (userLocation) {
+        city = await getCityName(userLocation[0], userLocation[1]);
+    }
+
+    addPost({
+      user: postData.isAnonymous ? '' : (user.displayName || user.email?.split('@')[0] || 'User'),
+      desc: postData.text,
+      likesCount: 0,
+      likedBy: [],
+      commentsCount: 0,
+      location: 'Алматы',
+      city: city,
+      color: 'linear-gradient(135deg, #7000FF, #00D1FF)',
+      mediaUrl: postData.mediaUrl,
+      isAnonymous: postData.isAnonymous,
+      hashtags: postData.hashtags,
+      privacy: postData.privacy as any,
+      audioUrl: postData.audioUrl,
+      audioName: postData.audioName
+    });
+    setIsAddModalOpen(false);
+    setActiveTab('feed'); 
+  };
+
+  return (
+    <>
+      <AppLayout
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onAddClick={() => setIsAddModalOpen(true)}
+      >
+        {activeTab === 'map' && <MapView />}
+        {activeTab === 'feed' && <PulseFeed posts={posts} />}
+        {activeTab === 'chats' && <ChatView />}
+        {activeTab === 'profile' && <ProfileView onOpenSettings={() => setIsSettingsOpen(true)} />}
+      </AppLayout>
+
+      <SettingsView 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+      />
+
+      <CreatePostModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onPublish={handlePublish}
+      />
+
+    </>
+  );
+}
+
+export default App;

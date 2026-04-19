@@ -1,0 +1,17 @@
+{
+    "name": "Pulse Social - Карта твоего ритма",
+    "short_name": "Pulse",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0B0B11",
+    "theme_color": "#7000FF",
+    "icons": [
+        {
+            "src": "https://cdn-icons-png.flaticon.com/512/3670/3670147.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "orientation": "portrait"
+}

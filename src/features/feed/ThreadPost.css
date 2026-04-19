@@ -1,0 +1,180 @@
+.thread-post-card {
+    margin: 12px;
+    padding: 16px;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.thread-main {
+    display: flex;
+    gap: 12px;
+}
+
+.thread-avatar-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.ghost-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(112, 0, 255, 0.1);
+    border: 1px solid rgba(112, 0, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thread-line {
+    width: 2px;
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 1px;
+}
+
+.thread-content-side {
+    flex: 1;
+}
+
+.thread-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.thread-author {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.thread-time {
+    font-size: 13px;
+    color: #555;
+}
+
+.thread-more {
+    margin-left: auto;
+    color: #555;
+}
+
+.thread-text {
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    color: #eee;
+}
+
+.thread-media {
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.thread-media img {
+    width: 100%;
+    display: block;
+}
+
+.thread-actions {
+    display: flex;
+    gap: 20px;
+}
+
+.thread-action-btn {
+    background: none;
+    border: none;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    padding: 4px 0;
+    cursor: pointer;
+}
+
+.thread-action-btn:active {
+    scale: 0.95;
+    color: white;
+}
+
+/* Comments Section */
+.thread-comments-section {
+    margin-top: 16px;
+    padding-left: 48px;
+    overflow: hidden;
+}
+
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.comment-item {
+    display: flex;
+    gap: 10px;
+}
+
+.comment-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+.comment-body {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 8px 12px;
+    border-radius: 0 12px 12px 12px;
+}
+
+.comment-user {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--secondary-color);
+    margin-bottom: 2px;
+    display: block;
+}
+
+.comment-body p {
+    font-size: 14px;
+    color: #ccc;
+}
+
+.comment-input-area {
+    margin-top: 16px;
+    display: flex;
+    gap: 8px;
+}
+
+.comment-input-area input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 8px 16px;
+    color: white;
+    font-size: 14px;
+}
+
+.comment-input-area button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 13px;
+}

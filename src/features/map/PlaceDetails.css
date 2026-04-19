@@ -1,0 +1,136 @@
+.place-details-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1500;
+    background: var(--panel-color);
+    border-radius: 30px 30px 0 0;
+    padding: 15px 20px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.handle {
+    width: 40px;
+    height: 4px;
+    background: var(--glass-border);
+    border-radius: 2px;
+    align-self: center;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.place-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.place-titles h3 {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.place-titles p {
+    color: var(--text-dim);
+    font-size: 14px;
+}
+
+.place-info-grid {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.rating-box {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+}
+
+.review-count {
+    color: var(--text-dim);
+    font-weight: 400;
+    font-size: 12px;
+}
+
+.status-badge {
+    background: rgba(0, 255, 148, 0.1);
+    color: #00FF94;
+    padding: 4px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.primary-action {
+    flex: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 16px;
+    background: var(--secondary-color);
+    color: black;
+    border: none;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.secondary-action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 16px;
+    border: none;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.contact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.photos-preview h4 {
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+
+.photo-grid {
+    display: flex;
+    gap: 12px;
+}
+
+.photo-placeholder {
+    width: 100px;
+    height: 100px;
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+}

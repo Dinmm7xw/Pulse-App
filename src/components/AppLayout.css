@@ -1,0 +1,78 @@
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+    overflow: hidden;
+}
+
+.main-content {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    height: calc(100vh - var(--nav-height));
+}
+
+.bottom-nav {
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(10, 10, 15, 0.85);
+    backdrop-filter: blur(25px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    gap: 4px;
+    flex: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nav-item span {
+    font-size: 10px;
+    font-weight: 500;
+}
+
+.nav-item.active {
+    color: var(--primary-color);
+}
+
+.nav-add-btn {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--primary-color);
+    border-radius: 18px;
+    margin-top: -10px; /* Reduced to avoid clashing */
+    box-shadow: 0 8px 25px rgba(112, 0, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-add-btn:hover {
+    transform: scale(1.1) translateY(-5px);
+    box-shadow: 0 12px 30px rgba(112, 0, 255, 0.7);
+}
+
+.nav-add-btn:active {
+    transform: scale(0.9);
+}

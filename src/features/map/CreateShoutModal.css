@@ -1,0 +1,213 @@
+.shout-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    z-index: 3000;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.shout-modal {
+    background: #0A0A0F;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px 24px 0 0;
+    padding: 24px;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+}
+
+.shout-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.shout-modal-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.shout-modal-header button {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.shout-type-selector {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+}
+
+.shout-type-selector::-webkit-scrollbar {
+    display: none;
+}
+
+.shout-type-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px 16px;
+    border-radius: 16px;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    transition: all 0.2s;
+    min-width: 80px;
+}
+
+.shout-type-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--active-color);
+}
+
+.shout-type-item span {
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
+}
+
+.shout-type-item.active {
+    background: rgba(var(--active-color), 0.1);
+    border-color: var(--active-color);
+}
+
+.shout-type-item.active .shout-type-icon {
+    background: var(--active-color);
+    color: white;
+    box-shadow: 0 0 15px var(--active-color);
+}
+
+.shout-type-item.active span {
+    color: white;
+}
+
+.shout-modal textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    min-height: 100px;
+    padding: 16px;
+    color: white;
+    font-size: 16px;
+    outline: none;
+    resize: none;
+    margin-bottom: 20px;
+}
+
+.shout-modal textarea:focus {
+    border-color: var(--primary-color);
+}
+
+.shout-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 0 4px;
+}
+
+.shout-anon-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.shout-anon-toggle span {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.shout-toggle-track {
+    width: 40px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 11px;
+    position: relative;
+    transition: background 0.2s;
+    margin-left: 4px;
+}
+
+.shout-toggle-track.active {
+    background: #00FF94;
+}
+
+.shout-toggle-thumb {
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s;
+}
+
+.shout-toggle-track.active .shout-toggle-thumb {
+    transform: translateX(18px);
+}
+
+.shout-timer-info {
+    font-size: 12px;
+    color: #888;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 6px 12px;
+    border-radius: 12px;
+}
+
+.shout-submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.shout-submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (min-width: 768px) {
+    .shout-modal-overlay {
+        justify-content: center;
+        align-items: center;
+    }
+    .shout-modal {
+        width: 400px;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+}
