@@ -36,6 +36,7 @@ export const MapView: React.FC = () => {
       { id: 'e2', name: 'Концерт: Sun Thali', type: 'concert', pos: [43.242, 76.905], desc: 'Дворец Республики. Начало в 20:00.' }
     ];
 
+    useEffect(() => {
         updateLocation();
         const interval = setInterval(updateLocation, 10000);
         return () => clearInterval(interval);
