@@ -15,7 +15,7 @@ interface SettingsViewProps {
   onClose: () => void;
 }
 
-type SettingsTab = 'profile' | 'account' | 'security' | 'notifications' | 'privacy' | 'terms' | 'about';
+type SettingsTab = 'main' | 'profile' | 'account' | 'security' | 'notifications' | 'privacy' | 'terms' | 'about';
 
 // Standard neutral avatar SVG for consistency and professional look
 export const NEUTRAL_AVATAR = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23555555'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E`;
@@ -61,7 +61,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
         setErrorMsg('');
         setSaveSuccess(false);
         if (window.innerWidth > 768) {
-            setActiveTab('profile');
+            setActiveTab('main');
             setShowCategoryList(true);
         } else {
             setActiveTab(null);
@@ -149,13 +149,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
   };
 
   const navItems = [
-    { id: 'profile', icon: <User size={20} />, label: 'Мой профиль' },
-    { id: 'account', icon: <FileText size={20} />, label: 'Учётная запись' },
-    { id: 'security', icon: <Lock size={20} />, label: 'Безопасность' },
-    { id: 'notifications', icon: <Bell size={20} />, label: 'Уведомления' },
-    { id: 'privacy', icon: <Shield size={20} />, label: 'Приватность' },
-    { id: 'terms', icon: <FileText size={20} />, label: 'Правила и условия' },
-    { id: 'about', icon: <HelpCircle size={20} />, label: 'О программе' },
+    { id: 'main', icon: <User size={18} />, label: 'Главная' },
+    { id: 'profile', icon: <User size={18} />, label: 'Мой профиль' },
+    { id: 'account', icon: <FileText size={18} />, label: 'Учётная запись' },
+    { id: 'security', icon: <Lock size={18} />, label: 'Безопасность' },
+    { id: 'notifications', icon: <Bell size={18} />, label: 'Уведомления' },
+    { id: 'privacy', icon: <Shield size={18} />, label: 'Приватность' },
+    { id: 'terms', icon: <FileText size={18} />, label: 'Правила и условия' },
+    { id: 'about', icon: <HelpCircle size={18} />, label: 'О программе' },
   ];
 
   const handleSelectTab = (tabId: SettingsTab) => {
@@ -178,18 +179,29 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
 
           {/* Sidebar / List View */}
           <aside className={`settings-sidebar ${showCategoryList ? 'v-active' : 'v-hidden'}`}>
-            <header className="sidebar-header-mobile">
-                <h2>Настройки</h2>
-                <button onClick={onClose} className="close-btn"><X /></button>
-            </header>
+            <div className="sidebar-profile-box">
+              <div className="sidebar-avatar">
+                {userProfile.photoURL || user?.photoURL ? (
+                  <img src={userProfile.photoURL || user?.photoURL || ''} alt="avatar" />
+                ) : <img src={NEUTRAL_AVATAR} alt="avatar" />}
+              </div>
+              <div className="sidebar-profile-info">
+                <span className="name">{userProfile.displayName || user?.displayName || 'Пользователь'}</span>
+                <span className="email">{user?.email}</span>
+              </div>
+            </div>
             
             <nav className="settings-nav">
               {navItems.map((item) => (
-                <button key={item.id} className={`settings-nav-item ${activeTab === item.id ? 'active' : ''}`} onClick={() => handleSelectTab(item.id as SettingsTab)}>
+                <button 
+                  key={item.id} 
+                  className={`settings-nav-item ${activeTab === item.id ? 'active' : ''}`} 
+                  onClick={() => handleSelectTab(item.id as SettingsTab)}
+                >
                   <div className="nav-item-left">
                     {item.icon} <span>{item.label}</span>
                   </div>
-                  <ChevronRight size={18} className="mobile-chevron" />
+                  <ChevronRight size={14} className="mobile-chevron" />
                 </button>
               ))}
             </nav>
@@ -201,19 +213,66 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
 
           {/* Content View */}
           <main className={`settings-content ${!showCategoryList ? 'v-active' : 'v-hidden'}`}>
-            <header className="content-header">
-              <div className="header-left">
-                {window.innerWidth <= 768 && <button className="back-btn" onClick={() => setShowCategoryList(true)}><ChevronLeft /> Назад</button>}
-                <h2>{navItems.find(i => i.id === activeTab)?.label}</h2>
+            <header className="content-header-top">
+              <div className="search-container">
+                <span className="search-icon"><Eye size={16} /></span>
+                <input type="text" placeholder="Найти параметр" />
               </div>
-              <button className="close-settings" onClick={onClose}><X size={24} /></button>
+              <button className="close-settings" onClick={onClose}><X size={20} /></button>
             </header>
 
             <div className="content-body">
+              <h2 className="content-title">{navItems.find(i => i.id === activeTab)?.label}</h2>
+
+              {/* ====== ГЛАВНАЯ (MAIN) ====== */}
+              {activeTab === 'main' && (
+                <>
+                  <div className="settings-hero-card">
+                    <div className="hero-img">
+                      {userProfile.photoURL || user?.photoURL ? (
+                        <img src={userProfile.photoURL || user?.photoURL || ''} alt="avatar" style={{width:'100%', height:'100%', objectFit:'cover'}} />
+                      ) : <div style={{width:'100%', height:'100%', background:'var(--primary-color)', display:'flex', alignItems:'center', justifyContent:'center', fontSize: '32px', fontWeight: '900'}}>P</div>}
+                    </div>
+                    <div className="hero-info">
+                      <div className="title">{userProfile.username || 'PULSE-USER'}</div>
+                      <div className="subtitle">Учетная запись подключена и защищена</div>
+                      <button className="insta-btn" style={{marginTop: '12px', padding: '4px 12px', fontSize: '12px'}} onClick={() => setActiveTab('profile')}>Переименовать</button>
+                    </div>
+                  </div>
+
+                  <div className="settings-group-card">
+                    <div className="settings-list-item" onClick={() => setActiveTab('notifications')}>
+                      <div className="item-icon"><Bell size={20} /></div>
+                      <div className="item-info">
+                        <span className="label">Уведомления</span>
+                        <span className="sublabel">Звуки, всплывающие сообщения</span>
+                      </div>
+                      <ChevronRight size={16} />
+                    </div>
+                    <div className="settings-list-item" onClick={() => setActiveTab('privacy')}>
+                      <div className="item-icon"><Shield size={20} /></div>
+                      <div className="item-info">
+                        <span className="label">Конфиденциальность и защита</span>
+                        <span className="sublabel">Местоположение, приватность профиля</span>
+                      </div>
+                      <ChevronRight size={16} />
+                    </div>
+                  </div>
+
+                  <div className="settings-hero-card" style={{background: 'rgba(112, 0, 255, 0.05)', border: '1px solid rgba(112, 0, 255, 0.2)'}}>
+                    <div className="hero-info">
+                      <div className="title" style={{color: 'var(--primary-color)'}}>Получите Pulse Premium</div>
+                      <div className="subtitle">Эксклюзивные маркеры, расширенная аналитика и отсутствие рекламы.</div>
+                      <button className="save-btn" style={{marginTop: '16px', padding: '8px 20px', width: 'auto'}}>Попробовать бесплатно</button>
+                    </div>
+                  </div>
+                </>
+              )}
+
               {/* ====== ПРОФИЛЬ ====== */}
               {activeTab === 'profile' && (
                 <div className="profile-edit-form">
-                    <div className="avatar-edit-section">
+                  <div className="settings-group-card" style={{padding: '24px', marginBottom: '24px'}}>
                       <div className="large-avatar-circle">
                         {userProfile.photoURL || user?.photoURL ? (
                           <img src={userProfile.photoURL || user?.photoURL || ''} alt="pfp" />
@@ -252,6 +311,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
               {/* ====== УЧЁТНАЯ ЗАПИСЬ ====== */}
               {activeTab === 'account' && (
                 <div className="account-settings-form">
+                  <div className="settings-group-card">
                     <div className="account-info-box">
                         <div className="account-info-row">
                             <label>Email</label>
@@ -263,7 +323,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
                         </div>
                     </div>
 
-                    <div className="account-actions-list">
+                    <div className="account-actions-list" style={{padding: '12px'}}>
                         <button className="account-action-btn-row">
                             <span>Верификация аккаунта</span>
                             <ChevronRight size={18} />
@@ -274,7 +334,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
                         </button>
                     </div>
 
-                    <div className="danger-zone-pulse">
+                    <div className="danger-zone-pulse" style={{margin: '12px', background: 'rgba(255, 77, 86, 0.05)'}}>
                         <h4>Управление аккаунтом</h4>
                         <button className="delete-pulse-btn" onClick={() => {
                             if(window.confirm("Удалить аккаунт навсегда? Это действие необратимо.")) {
@@ -284,13 +344,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
                              Удалить учетную запись
                         </button>
                     </div>
+                  </div>
                 </div>
               )}
 
               {/* ====== БЕЗОПАСНОСТЬ ====== */}
               {activeTab === 'security' && (
                 <div className="security-edit-form">
-                    <div className="security-info-card">
+                  <div className="settings-group-card" style={{padding: '24px'}}>
+                    <div className="security-info-card" style={{marginBottom: '24px'}}>
                       <p><strong>Email:</strong> {user?.email}</p>
                       <p className="hint">Аккаунт создан через {user?.providerData[0]?.providerId === 'google.com' ? 'Google' : 'Email/Пароль'}</p>
                     </div>
@@ -316,12 +378,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
                       </>
                     )}
                     {errorMsg && <p className="error-msg">{errorMsg}</p>}
+                  </div>
                 </div>
               )}
 
               {/* ====== УВЕДОМЛЕНИЯ ====== */}
               {activeTab === 'notifications' && (
                 <div className="notifications-form">
+                  <div className="settings-group-card" style={{padding: '0 24px'}}>
                     <div className="toggle-setting">
                       <div>
                         <span className="toggle-label">Push-уведомления</span>
@@ -340,7 +404,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
                         <div className="toggle-knob" />
                       </div>
                     </div>
-                    <div className="toggle-setting">
+                    <div className="toggle-setting" style={{borderBottom: 'none'}}>
                       <div>
                         <span className="toggle-label">Лайки</span>
                         <p className="toggle-desc">Уведомлять когда кто-то лайкнул ваш пост</p>
@@ -349,20 +413,23 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
                         <div className="toggle-knob" />
                       </div>
                     </div>
+                  </div>
                 </div>
               )}
 
               {/* ====== ПРИВАТНОСТЬ ====== */}
               {activeTab === 'privacy' && (
                 <div className="privacy-form">
-                    <div className="toggle-setting">
-                      <div>
-                        <span className="toggle-label">Скрыть местоположение</span>
-                        <p className="toggle-desc">Другие пользователи не увидят вас на карте</p>
-                      </div>
-                      <div className={`toggle-switch ${hideLocation ? 'active' : ''}`} onClick={() => setHideLocation(!hideLocation)}>
-                        <div className="toggle-knob" />
-                      </div>
+                    <div className="settings-group-card" style={{padding: '0 24px'}}>
+                        <div className="toggle-setting" style={{borderBottom: 'none'}}>
+                          <div>
+                            <span className="toggle-label">Скрыть местоположение</span>
+                            <p className="toggle-desc">Другие пользователи не увидят вас на карте</p>
+                          </div>
+                          <div className={`toggle-switch ${hideLocation ? 'active' : ''}`} onClick={() => setHideLocation(!hideLocation)}>
+                            <div className="toggle-knob" />
+                          </div>
+                        </div>
                     </div>
                     <button className={`save-btn ${saveSuccess ? 'success' : ''}`} onClick={handleSavePrivacy} disabled={isSaving} style={{ marginTop: '24px' }}>
                       {isSaving ? 'Сохранение...' : saveSuccess ? '✓ Сохранено!' : 'Сохранить настройки'}
@@ -430,34 +497,36 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
               {/* ====== О ПРОГРАММЕ ====== */}
               {activeTab === 'about' && (
                 <div className="about-section">
-                    <div className="about-logo-block">
-                      <div className="about-logo">P</div>
-                      <h3>Pulse</h3>
-                      <p className="version-text">Версия 1.0.0</p>
-                    </div>
-                    
-                    <div className="about-info-list">
-                      <div className="about-info-item">
-                        <span>Платформа</span>
-                        <span className="value">Progressive Web App</span>
-                      </div>
-                      <div className="about-info-item">
-                        <span>Технологии</span>
-                        <span className="value">React, Firebase, Vite</span>
-                      </div>
-                      <div className="about-info-item">
-                        <span>Разработчик</span>
-                        <span className="value">Dinmuhammed</span>
-                      </div>
-                      <div className="about-info-item">
-                        <span>Год</span>
-                        <span className="value">2026</span>
-                      </div>
-                    </div>
+                    <div className="settings-group-card" style={{padding: '32px', width: '100%', alignItems: 'center', textAlign: 'center'}}>
+                        <div className="about-logo-block">
+                          <div className="about-logo">P</div>
+                          <h3>Pulse</h3>
+                          <p className="version-text">Версия 1.0.0</p>
+                        </div>
+                        
+                        <div className="about-info-list">
+                          <div className="about-info-item">
+                            <span>Платформа</span>
+                            <span className="value">Progressive Web App</span>
+                          </div>
+                          <div className="about-info-item">
+                            <span>Технологии</span>
+                            <span className="value">React, Firebase, Vite</span>
+                          </div>
+                          <div className="about-info-item">
+                            <span>Разработчик</span>
+                            <span className="value">Dinmuhammed</span>
+                          </div>
+                          <div className="about-info-item" style={{borderBottom: 'none'}}>
+                            <span>Год</span>
+                            <span className="value">2026</span>
+                          </div>
+                        </div>
 
-                    <div className="copyright-block">
-                      <p>© 2026 Pulse App. Все права защищены.</p>
-                      <p>Использование данного приложения регулируется условиями, изложенными в разделе «Правила и условия».</p>
+                        <div className="copyright-block" style={{borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: '24px', paddingTop: '16px'}}>
+                          <p>© 2026 Pulse App. Все права защищены.</p>
+                          <p style={{fontSize: '11px', marginTop: '8px', opacity: 0.6}}>Использование данного приложения регулируется условиями, изложенными в разделе «Правила и условия».</p>
+                        </div>
                     </div>
                 </div>
               )}
