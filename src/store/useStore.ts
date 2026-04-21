@@ -414,6 +414,7 @@ export const usePulseStore = () => {
     updateLocation, 
     friendsLocations, 
     friendRequests,
+    confirmedFriendIds,
     sendFriendRequest,
     acceptFriendRequest, 
     userProfile,

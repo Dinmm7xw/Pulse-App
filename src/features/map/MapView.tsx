@@ -36,9 +36,8 @@ export const MapView: React.FC = () => {
       { id: 'e2', name: 'Концерт: Sun Thali', type: 'concert', pos: [43.242, 76.905], desc: 'Дворец Республики. Начало в 20:00.' }
     ];
 
-    useEffect(() => {
         updateLocation();
-        const interval = setInterval(updateLocation, 30000);
+        const interval = setInterval(updateLocation, 10000);
         return () => clearInterval(interval);
     }, [updateLocation]);
 
@@ -85,6 +84,7 @@ export const MapView: React.FC = () => {
                 center={userPos}
                 zoom={14}
                 zoomControl={false}
+                attributionControl={false}
                 className="leaflet-container-pulse"
                 key={userPos[0]} 
             >
