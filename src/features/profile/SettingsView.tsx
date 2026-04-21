@@ -179,7 +179,12 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
 
           {/* Sidebar / List View */}
           <aside className={`settings-sidebar ${showCategoryList ? 'v-active' : 'v-hidden'}`}>
-            <div className="sidebar-profile-box">
+            <div className="sidebar-header-mobile">
+              <h2>Настройки</h2>
+              <button className="close-settings" onClick={onClose}><X size={24} /></button>
+            </div>
+
+            <div className="sidebar-profile-box desktop-only">
               <div className="sidebar-avatar">
                 {userProfile.photoURL || user?.photoURL ? (
                   <img src={userProfile.photoURL || user?.photoURL || ''} alt="avatar" />
@@ -215,9 +220,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
           <main className={`settings-content ${!showCategoryList ? 'v-active' : 'v-hidden'}`}>
             <header className="content-header-top">
               <div className="header-left-group">
-                {(!showCategoryList || window.innerWidth <= 900) && (
+                {window.innerWidth <= 900 && (
                   <button className="back-btn-modern" onClick={() => setShowCategoryList(true)}>
-                    <ChevronLeft size={18} /> Назад
+                    <ChevronLeft size={24} />
                   </button>
                 )}
                 <h2 className="content-title">{navItems.find(i => i.id === activeTab)?.label}</h2>
