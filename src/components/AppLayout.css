@@ -1,8 +1,8 @@
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    width: 100vw;
+    height: 100%;
+    width: 100%;
     position: relative;
     overflow: hidden;
 }
@@ -11,24 +11,26 @@
     flex: 1;
     position: relative;
     overflow: hidden;
-    height: calc(100vh - var(--nav-height));
+    padding-bottom: calc(var(--nav-height) + var(--safe-bottom));
 }
 
 .bottom-nav {
-    height: 70px;
+    height: calc(var(--nav-height) + var(--safe-bottom));
+    padding-bottom: var(--safe-bottom);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 10px;
+    padding-left: 10px;
+    padding-right: 10px;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 1000;
-    background: rgba(10, 10, 15, 0.85);
+    background: rgba(10, 10, 15, 0.92);
     backdrop-filter: blur(25px);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+    -webkit-backdrop-filter: blur(25px);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .nav-item {
@@ -38,10 +40,11 @@
     background: none;
     border: none;
     color: var(--text-dim);
-    gap: 4px;
+    gap: 3px;
     flex: 1;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: color 0.2s ease;
+    padding: 8px 0;
 }
 
 .nav-item span {
@@ -54,25 +57,29 @@
 }
 
 .nav-add-btn {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     display: flex;
     justify-content: center;
     align-items: center;
     background: var(--primary-color);
-    border-radius: 18px;
-    margin-top: -10px; /* Reduced to avoid clashing */
-    box-shadow: 0 8px 25px rgba(112, 0, 255, 0.5);
+    border-radius: 16px;
+    margin-top: -8px;
+    box-shadow: 0 6px 20px rgba(112, 0, 255, 0.4);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.2s ease;
     border: 2px solid rgba(255, 255, 255, 0.1);
-}
-
-.nav-add-btn:hover {
-    transform: scale(1.1) translateY(-5px);
-    box-shadow: 0 12px 30px rgba(112, 0, 255, 0.7);
+    flex-shrink: 0;
 }
 
 .nav-add-btn:active {
     transform: scale(0.9);
+}
+
+/* Disable hover effects on touch devices */
+@media (hover: hover) {
+    .nav-add-btn:hover {
+        transform: scale(1.05) translateY(-3px);
+        box-shadow: 0 10px 25px rgba(112, 0, 255, 0.6);
+    }
 }

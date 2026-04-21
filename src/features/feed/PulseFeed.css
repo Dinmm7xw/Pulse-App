@@ -9,16 +9,17 @@
 
 .feed-header-tabs {
     position: absolute;
-    top: 20px;
+    top: calc(15px + var(--safe-top, 0px));
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1000;
+    z-index: 100;
     display: flex;
     gap: 20px;
     padding: 10px 24px;
     border-radius: 50px;
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -27,7 +28,7 @@
     font-weight: 700;
     color: rgba(255, 255, 255, 0.5);
     cursor: pointer;
-    transition: all 0.3s;
+    transition: color 0.3s;
     white-space: nowrap;
 }
 
@@ -43,23 +44,24 @@
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
+    overscroll-behavior: contain;
 }
 
 .feed-scroll-content::-webkit-scrollbar {
     display: none;
 }
 
-/* Tab Specific Layouts */
+/* Threads (Анон) layout */
 .feed-scroll-content.threads-layout {
     scroll-snap-type: none;
     padding-top: 80px;
-    padding-bottom: 90px;
+    padding-bottom: 20px;
     background: var(--bg-color);
 }
 
+/* TikTok full-screen layout */
 .feed-scroll-content.full-layout {
     height: 100%;
-    padding-bottom: 70px; /* Shift content up to avoid being under nav */
 }
 
 /* Full Layout Item (TikTok style) */
@@ -79,61 +81,60 @@
 
 .feed-overlay {
     position: absolute;
-    bottom: 80px; /* Move up above nav bar */
+    bottom: 0;
     left: 0;
     right: 0;
-    padding: 0 20px;
-    background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+    padding: 20px 16px 16px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    pointer-events: none; /* Allow passthrough for scrolling if needed */
-}
-
-.post-info, .post-actions {
-    pointer-events: auto; /* Re-enable for buttons and text */
 }
 
 .post-info {
     flex: 1;
     color: white;
-    padding-bottom: 20px;
+    padding-right: 12px;
 }
 
 .post-info h3 {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .post-info p {
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.4;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .location-tag {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
+    gap: 5px;
+    padding: 5px 10px;
     border-radius: 50px;
-    font-size: 12px;
-    margin-bottom: 12px;
+    font-size: 11px;
+    margin-bottom: 8px;
 }
 
 .music-info {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     overflow: hidden;
-    width: 200px;
+    max-width: 200px;
 }
 
 .music-scroll {
     white-space: nowrap;
     animation: scroll-text 10s linear infinite;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 @keyframes scroll-text {
@@ -144,26 +145,32 @@
 .post-actions {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .action-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     color: white;
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 600;
 }
 
 .icon-circle {
-    width: 50px;
-    height: 50px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.icon-circle.liked {
+    background: rgba(255, 77, 86, 0.15) !important;
 }
 
 .empty-feed {

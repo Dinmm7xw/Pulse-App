@@ -11,6 +11,7 @@ export interface Post {
   timestamp: any;
   mediaUrl?: string;
   userId?: string;
+  userAvatar?: string;
   isAnonymous?: boolean;
   hashtags?: string[];
   privacy?: 'public' | 'friends' | 'private';
@@ -45,6 +46,30 @@ export interface Message {
   senderName: string;
   text: string;
   timestamp: any;
+  type?: 'text' | 'image' | 'audio';
+  mediaUrl?: string;
+}
+
+export interface Chat {
+  id: string;
+  participants: string[];
+  participantNames: Record<string, string>;
+  participantAvatars: Record<string, string>;
+  lastMsg: string;
+  lastTime: any;
+  type: 'direct' | 'community';
+  unread?: Record<string, number>;
+}
+
+export interface CallSession {
+  id: string;
+  callerId: string;
+  callerName: string;
+  callerAvatar: string;
+  receiverId: string;
+  type: 'audio' | 'video';
+  status: 'ringing' | 'active' | 'ended';
+  startedAt: any;
 }
 
 export interface UserLocation {

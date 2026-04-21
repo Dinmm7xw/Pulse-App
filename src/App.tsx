@@ -14,12 +14,13 @@ import { SettingsView } from './features/profile/SettingsView';
 import { getCityName } from './lib/geo';
 import { Loader2 } from 'lucide-react';
 
+function App() {
   const [user, setUser] = useState<any>(null);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [activeTab, setActiveTab] = useState('map');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [refreshProfile, setRefreshProfile] = useState(0); // Dummy state to force check
+  const [refreshProfile, setRefreshProfile] = useState(0);
   const { posts, addPost, userLocation, userProfile } = usePulseStore();
 
   useEffect(() => {

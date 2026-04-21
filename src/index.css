@@ -10,6 +10,8 @@
   --glass-border: rgba(255, 255, 255, 0.1);
   --font-main: 'Inter', system-ui, -apple-system, sans-serif;
   --nav-height: 70px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
 }
 
 * {
@@ -17,6 +19,7 @@
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 button {
@@ -27,6 +30,7 @@ button {
   font: inherit;
   cursor: pointer;
   -webkit-appearance: none;
+  user-select: none;
 }
 
 input, textarea {
@@ -35,22 +39,35 @@ input, textarea {
   border-radius: 0;
 }
 
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   background-color: var(--bg-color);
   color: var(--text-main);
   font-family: var(--font-main);
-  overflow: hidden; 
-  height: 100vh;
+  overflow: hidden;
+  height: 100dvh;
+  height: 100vh; /* fallback */
   width: 100vw;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
-
 
 #root {
   height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* Glassmorphism utility */
@@ -70,11 +87,31 @@ body {
   transition: opacity 300ms;
 }
 
+/* Spinner */
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 0px;
+  display: none;
 }
-::-webkit-scrollbar-thumb {
-  background: var(--primary-color);
-  border-radius: 10px;
+
+/* Disable text selection on interactive elements for native feel */
+nav, button, .nav-item, .bottom-nav, .chat-pills, .feed-header-tabs {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Touch active states for native feel */
+@media (hover: none) and (pointer: coarse) {
+  button:active, .nav-item:active, .chat-item-premium:active {
+    opacity: 0.7;
+    transition: opacity 0.1s;
+  }
 }

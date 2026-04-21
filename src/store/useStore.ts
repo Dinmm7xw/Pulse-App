@@ -12,8 +12,10 @@ import {
   doc,
   setDoc,
   deleteDoc,
+  getDocs,
   Timestamp,
-  updateDoc as firestoreUpdateDoc
+  updateDoc as firestoreUpdateDoc,
+  limit
 } from 'firebase/firestore';
 import type { 
     Post, 
@@ -22,7 +24,8 @@ import type {
     Message, 
     UserLocation, 
     FriendRequest, 
-    UserProfile 
+    UserProfile,
+    Chat
 } from '../types';
 
 export const usePulseStore = () => {
@@ -33,6 +36,7 @@ export const usePulseStore = () => {
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [confirmedFriendIds, setConfirmedFriendIds] = useState<string[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile>({ bio: '', username: '' });
+  const [chats, setChats] = useState<Chat[]>([]);
 
   // Sync profile data from Firestore
   useEffect(() => {
@@ -82,6 +86,31 @@ export const usePulseStore = () => {
     });
 
     return () => unsubscribe();
+  }, []);
+
+  // Real-time chats listener
+  useEffect(() => {
+    let unsubChats: () => void;
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const q = query(
+          collection(db, "chats"),
+          where("participants", "array-contains", user.uid),
+          orderBy("lastTime", "desc")
+        );
+        unsubChats = onSnapshot(q, (snapshot) => {
+          const chatsData = snapshot.docs.map(d => ({
+            id: d.id,
+            ...d.data()
+          })) as Chat[];
+          setChats(chatsData);
+        });
+      }
+    });
+    return () => {
+      unsubAuth();
+      if (unsubChats) unsubChats();
+    };
   }, []);
 
   // Sync friendship statuses
@@ -136,9 +165,11 @@ export const usePulseStore = () => {
 
   const addPost = useCallback(async (newPost: Omit<Post, 'id' | 'timestamp'>) => {
     try {
+      const user = auth.currentUser;
       await addDoc(collection(db, "posts"), {
         ...newPost,
-        userId: auth.currentUser?.uid,
+        userId: user?.uid,
+        userAvatar: userProfile.photoURL || user?.photoURL || '',
         likesCount: 0,
         likedBy: [],
         commentsCount: 0,
@@ -147,7 +178,7 @@ export const usePulseStore = () => {
     } catch (error) {
       console.error("Error adding post: ", error);
     }
-  }, []);
+  }, [userProfile.photoURL]);
 
   const addShout = useCallback(async (newShout: Omit<Shout, 'id' | 'timestamp' | 'userId'>) => {
     if (!auth.currentUser) return;
@@ -211,8 +242,9 @@ export const usePulseStore = () => {
     try {
         await addDoc(collection(db, `chats/${chatId}/messages`), {
             senderId: auth.currentUser.uid,
-            senderName: auth.currentUser.displayName || 'User',
+            senderName: userProfile.displayName || auth.currentUser.displayName || 'User',
             text,
+            type: 'text',
             timestamp: serverTimestamp()
         });
         
@@ -223,7 +255,7 @@ export const usePulseStore = () => {
     } catch (error) {
         console.error("Error sending message:", error);
     }
-  }, []);
+  }, [userProfile.displayName]);
 
   const listenToMessages = useCallback((chatId: string, callback: (msgs: Message[]) => void) => {
     const q = query(collection(db, `chats/${chatId}/messages`), orderBy("timestamp", "asc"));
@@ -239,6 +271,60 @@ export const usePulseStore = () => {
         const commentsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Comment[];
         callback(commentsData);
     });
+  }, []);
+
+  // Create a direct chat with another user
+  const createDirectChat = useCallback(async (targetUserId: string, targetName: string, targetAvatar: string) => {
+    if (!auth.currentUser) return null;
+    const myId = auth.currentUser.uid;
+    const myName = userProfile.displayName || userProfile.username || auth.currentUser.displayName || 'User';
+    const myAvatar = userProfile.photoURL || auth.currentUser.photoURL || '';
+
+    // Check if chat already exists
+    const existingQuery = query(
+      collection(db, "chats"),
+      where("participants", "array-contains", myId),
+      where("type", "==", "direct")
+    );
+    const existingSnap = await getDocs(existingQuery);
+    const existing = existingSnap.docs.find(d => {
+      const data = d.data();
+      return data.participants.includes(targetUserId);
+    });
+
+    if (existing) return { id: existing.id, ...existing.data() } as Chat;
+
+    // Create new chat
+    const chatRef = await addDoc(collection(db, "chats"), {
+      participants: [myId, targetUserId],
+      participantNames: { [myId]: myName, [targetUserId]: targetName },
+      participantAvatars: { [myId]: myAvatar, [targetUserId]: targetAvatar },
+      type: 'direct',
+      lastMsg: '',
+      lastTime: serverTimestamp()
+    });
+
+    return { id: chatRef.id, participants: [myId, targetUserId], type: 'direct' } as Chat;
+  }, [userProfile]);
+
+  // Search users by username
+  const searchUsers = useCallback(async (searchQuery: string) => {
+    if (!searchQuery.trim() || searchQuery.length < 2) return [];
+    try {
+      const q = query(
+        collection(db, "userProfiles"),
+        where("username", ">=", searchQuery.toLowerCase()),
+        where("username", "<=", searchQuery.toLowerCase() + '\uf8ff'),
+        limit(20)
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs
+        .filter(d => d.id !== auth.currentUser?.uid)
+        .map(d => ({ id: d.id, ...d.data() }));
+    } catch (error) {
+      console.error("Error searching users:", error);
+      return [];
+    }
   }, []);
 
   const syncLocation = useCallback(async (lat: number, lng: number) => {
@@ -314,6 +400,7 @@ export const usePulseStore = () => {
   return { 
     posts, 
     shouts,
+    chats,
     addPost, 
     addShout,
     addComment,
@@ -321,6 +408,8 @@ export const usePulseStore = () => {
     likePost,
     sendMessage,
     listenToMessages,
+    createDirectChat,
+    searchUsers,
     userLocation, 
     updateLocation, 
     friendsLocations, 
