@@ -1,0 +1,63 @@
+.crop-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #000;
+    z-index: 6000;
+    display: flex;
+    flex-direction: column;
+}
+
+.crop-header {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 10;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+}
+
+.crop-header span {
+    font-weight: 700;
+}
+
+.confirm-btn {
+    background: #ff0050;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cropper-container {
+    flex: 1;
+    position: relative;
+    background: #000;
+}
+
+.crop-controls {
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 40px;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    z-index: 10;
+}
+
+.zoom-slider {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.zoom-slider input {
+    flex: 1;
+    accent-color: #ff0050;
+}

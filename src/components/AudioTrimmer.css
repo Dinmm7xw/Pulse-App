@@ -1,0 +1,66 @@
+.audio-trimmer-modal {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 15, 0.95);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 20px;
+    z-index: 200;
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trimmer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.trimmer-header span {
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.confirm-btn {
+    background: #ff0050;
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+.waveform-container {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.trim-info {
+    display: flex;
+    justify-content: space-between;
+    color: #888;
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+
+.trimmer-controls {
+    display: flex;
+    justify-content: center;
+}
+
+.play-pause-btn {
+    width: 56px;
+    height: 56px;
+    background: white;
+    border-radius: 50%;
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+}

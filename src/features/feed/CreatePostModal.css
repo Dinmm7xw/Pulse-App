@@ -10,6 +10,38 @@
     backdrop-filter: blur(10px);
 }
 
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5000;
+}
+
+.countdown-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.3);
+    z-index: 100;
+    pointer-events: none;
+}
+
+.countdown-overlay span {
+    font-size: 120px;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+.timer-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+}
+
 .create-post-modal {
     position: fixed;
     top: 0;
@@ -735,6 +767,168 @@
     font-size: 12px;
     color: #444;
     line-height: 1.5;
+}
+
+/* Editor View Style */
+.editor-view {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+}
+
+.media-preview-container {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.editor-media-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.editor-sidebar {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 20;
+}
+
+.editor-tool-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+}
+
+.tool-icon-wrap {
+    width: 44px;
+    height: 44px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    transition: background 0.2s;
+}
+
+.editor-tool-btn:active .tool-icon-wrap {
+    background: rgba(255,255,255,0.2);
+    transform: scale(0.9);
+}
+
+.editor-tool-btn span {
+    font-size: 10px;
+    font-weight: 600;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.editor-footer {
+    position: absolute;
+    bottom: 20px;
+    left: 0; right: 0;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 30;
+}
+
+.back-btn {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.next-btn {
+    background: #FF0050;
+    border: none;
+    color: white;
+    padding: 12px 40px;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(255, 0, 80, 0.4);
+}
+
+/* Music Selector Overlay */
+.music-selector-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.music-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.music-header h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.music-list-vertical {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.music-row-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.music-row-item img {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.track-details .name {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.track-details .artist {
+    font-size: 11px;
+    color: #888;
 }
 
 .spin {

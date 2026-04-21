@@ -5,6 +5,8 @@ import { auth } from '../../lib/firebase';
 import { uploadMedia } from '../../lib/upload';
 import { PULSE_LIBRARY } from '../../constants/audio';
 import type { PulseTrack } from '../../constants/audio';
+import { AudioTrimmer } from '../../components/AudioTrimmer';
+import { CropModal } from '../../components/CropModal';
 import './CreatePostModal.css';
 
 const NEUTRAL_AVATAR = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23555555'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E`;
@@ -23,9 +25,11 @@ interface CreatePostModalProps {
     }) => void;
 }
 
-type Mode = 'camera' | 'text' | 'preview';
+type Step = 'CAPTURE' | 'EDIT' | 'FINALIZE';
+type Mode = 'camera' | 'text';
 
 export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, onPublish }) => {
+    const [step, setStep] = useState<Step>('CAPTURE');
     const [mode, setMode] = useState<Mode>('camera');
     const [text, setText] = useState('');
     const [isAnonymous, setIsAnonymous] = useState(false);
@@ -49,6 +53,14 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
     const [activeFilter, setActiveFilter] = useState('none');
+    const [timer, setTimer] = useState<0 | 3 | 10>(0);
+    const [isCountingDown, setIsCountingDown] = useState(false);
+    const [countdown, setCountdown] = useState(0);
+    
+    // Editor UI state
+    const [showTrimmer, setShowTrimmer] = useState(false);
+    const [showCropper, setShowCropper] = useState(false);
+    const [trimmedInfo, setTrimmedInfo] = useState<{start: number, duration: number} | null>(null);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -144,6 +156,33 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
         setMode('preview');
     };
 
+    const handleCaptureAction = () => {
+        if (isCountingDown) return;
+        
+        if (timer > 0) {
+            setIsCountingDown(true);
+            setCountdown(timer);
+            const int = setInterval(() => {
+                setCountdown(prev => {
+                    if (prev <= 1) {
+                        clearInterval(int);
+                        setIsCountingDown(false);
+                        if (mediaType === 'image') capturePhoto();
+                        else startRecording();
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+        } else {
+            if (mediaType === 'image') capturePhoto();
+            else {
+                if (isRecording) stopRecording();
+                else startRecording();
+            }
+        }
+    };
+
     const startRecording = () => {
         if (!videoRef.current?.srcObject) return;
         const stream = videoRef.current.srcObject as MediaStream;
@@ -154,7 +193,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
         mediaRecorder.onstop = () => {
             const blob = new Blob(chunksRef.current, { type: 'video/mp4' });
             const url = URL.createObjectURL(blob);
-            setCapturedVideo(url); setMediaBlob(blob); setMediaType('video'); setMode('preview');
+            setCapturedVideo(url); setMediaBlob(blob); setMediaType('video'); setStep('EDIT');
         };
         mediaRecorder.start();
         setIsRecording(true);
@@ -183,7 +222,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
             if (blob) {
                 setCapturedImage(URL.createObjectURL(blob));
                 setMediaBlob(blob);
-                setMode('preview');
+                setStep('EDIT');
             }
         }, 'image/jpeg', 0.8);
     };
@@ -221,43 +260,9 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
     };
 
     const toggleMusic = (track: PulseTrack) => {
-        if (selectedTrack?.id === track.id) {
-            if (isAudioPlaying) {
-                audioRef.current?.pause();
-                setIsAudioPlaying(false);
-            } else {
-                audioRef.current?.play();
-                setIsAudioPlaying(true);
-            }
-        } else {
-            if (audioRef.current) {
-                audioRef.current.pause();
-            }
-            setSelectedTrack(track);
-            const audio = new Audio();
-            audio.preload = "auto";
-            audio.src = track.url;
-            audioRef.current = audio;
-            
-            // Basic event listeners for debugging
-            audio.onerror = () => console.error("Audio failed to load:", track.url);
-            
-            // Modern browsers return a promise from play()
-            const playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    setIsAudioPlaying(true);
-                }).catch(e => {
-                    if (e.name !== 'AbortError') {
-                        console.warn("Initial playback failed, trying load()...", e);
-                        audio.load();
-                        audio.play().then(() => setIsAudioPlaying(true)).catch(() => {});
-                    }
-                });
-            }
-            
-            audio.onended = () => setIsAudioPlaying(false);
-        }
+        setSelectedTrack(track);
+        setShowMusicSelector(false);
+        setShowTrimmer(true);
     };
 
     // Cleanup audio on modal close
@@ -338,42 +343,136 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                         >
-                            {mode === 'camera' ? (
-                                <div className="camera-view">
-                                    <video ref={videoRef} autoPlay playsInline muted className="camera-video-preview" style={{ filter: activeFilter }} />
-                                    <canvas ref={canvasRef} style={{ display: 'none' }} />
-                                    {isRecording && (
-                                        <div className="recording-indicator-overlay">
-                                            <div className="blink-dot"></div>
-                                            <span>{formatTime(recordingTime)}</span>
+                                    <div className="camera-view">
+                                        <video ref={videoRef} autoPlay playsInline muted className="camera-video-preview" style={{ filter: activeFilter }} />
+                                        <canvas ref={canvasRef} style={{ display: 'none' }} />
+                                        
+                                        {isCountingDown && (
+                                            <div className="countdown-overlay">
+                                                <motion.span
+                                                    key={countdown}
+                                                    initial={{ scale: 2, opacity: 0 }}
+                                                    animate={{ scale: 1, opacity: 1 }}
+                                                    exit={{ scale: 0.5, opacity: 0 }}
+                                                >
+                                                    {countdown}
+                                                </motion.span>
+                                            </div>
+                                        )}
+
+                                        {isRecording && (
+                                            <div className="recording-indicator-overlay">
+                                                <div className="blink-dot"></div>
+                                                <span>{formatTime(recordingTime)}</span>
+                                            </div>
+                                        )}
+
+                                        <div className="camera-controls-top">
+                                            <button className="icon-btn" onClick={onClose}><X size={24} /></button>
+                                            <div className="camera-tools">
+                                                <button className={`tool-btn ${flashOn ? 'active' : ''}`} onClick={toggleFlash}><Zap size={20} fill={flashOn ? "#FFD700" : "none"} /></button>
+                                                <button className={`tool-btn ${timer > 0 ? 'active' : ''}`} onClick={() => setTimer(timer === 0 ? 3 : timer === 3 ? 10 : 0)}>
+                                                    <span className="timer-label">{timer > 0 ? `${timer}s` : '⏲️'}</span>
+                                                </button>
+                                                <button className="tool-btn" onClick={switchCamera}><RefreshCw size={20} /></button>
+                                            </div>
                                         </div>
-                                    )}
-                                    <div className="camera-controls-top">
-                                        <button className="icon-btn" onClick={onClose}><X size={24} /></button>
-                                        <div className="camera-tools">
-                                            <button className={`tool-btn ${flashOn ? 'active' : ''}`} onClick={toggleFlash}><Zap size={20} fill={flashOn ? "#FFD700" : "none"} /></button>
-                                            <button className="tool-btn" onClick={switchCamera}><RefreshCw size={20} /></button>
+
+                                        <div className="camera-controls-bottom">
+                                            <div className="mode-selector">
+                                                <span className={mediaType === 'video' ? 'active' : ''} onClick={() => setMediaType('video')}>Видео</span>
+                                                <span className={mediaType === 'image' ? 'active' : ''} onClick={() => setMediaType('image')}>Фото</span>
+                                                <span onClick={() => setMode('text')}>Текст</span>
+                                            </div>
+                                            <div className="capture-row">
+                                                <label className="gallery-preview glass"><Camera size={20} /><input type="file" hidden accept="image/*,video/*" onChange={handleGalleryUpload} /></label>
+                                                <div className={`capture-btn-outer ${isRecording ? 'recording' : ''}`} 
+                                                     onClick={handleCaptureAction}>
+                                                    <div className="capture-btn-inner"></div>
+                                                </div>
+                                                <div className="filter-preview glass" onClick={cycleFilter}>✨</div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="camera-controls-bottom">
-                                        <div className="mode-selector">
-                                            <span className={mediaType === 'video' ? 'active' : ''} onClick={() => setMediaType('video')}>Видео</span>
-                                            <span className={mediaType === 'image' ? 'active' : ''} onClick={() => setMediaType('image')}>Фото</span>
-                                            <span onClick={() => setMode('text')}>Текст</span>
+                                ) : step === 'EDIT' ? (
+                                    <div className="editor-view">
+                                        <div className="media-preview-container">
+                                            {mediaType === 'video' ? (
+                                                <video src={capturedVideo!} autoPlay loop muted playsInline className="editor-media-preview" />
+                                            ) : (
+                                                <img src={capturedImage!} alt="" className="editor-media-preview" />
+                                            )}
                                         </div>
-                                        <div className="capture-row">
-                                            <label className="gallery-preview glass"><Camera size={20} /><input type="file" hidden accept="image/*,video/*" onChange={handleGalleryUpload} /></label>
-                                            <div className={`capture-btn-outer ${isRecording ? 'recording' : ''}`} 
-                                                 onTouchStart={() => mediaType === 'video' && startRecording()}
-                                                 onTouchEnd={() => mediaType === 'video' && stopRecording()}
-                                                 onMouseDown={() => (window.innerWidth > 768 && mediaType === 'video') && startRecording()}
-                                                 onMouseUp={() => (window.innerWidth > 768 && mediaType === 'video') && stopRecording()}
-                                                 onClick={() => mediaType === 'image' && capturePhoto()}><div className="capture-btn-inner"></div></div>
-                                            <div className="filter-preview glass" onClick={cycleFilter}>✨</div>
+
+                                        <div className="editor-sidebar">
+                                            <button className="editor-tool-btn" onClick={() => setShowMusicSelector(true)}>
+                                                <div className="tool-icon-wrap"><Music size={22} /></div>
+                                                <span>Музыка</span>
+                                            </button>
+                                            <button className="editor-tool-btn" onClick={() => setShowCropper(true)}>
+                                                <div className="tool-icon-wrap"><Hash size={22} /></div>
+                                                <span>Обрезать</span>
+                                            </button>
+                                            <button className="editor-tool-btn" onClick={() => alert('Текст скоро!')}>
+                                                <div className="tool-icon-wrap"><span>Aa</span></div>
+                                                <span>Текст</span>
+                                            </button>
+                                            <button className="editor-tool-btn" onClick={cycleFilter}>
+                                                <div className="tool-icon-wrap">✨</div>
+                                                <span>Фильтры</span>
+                                            </button>
                                         </div>
+
+                                        {showTrimmer && selectedTrack && (
+                                            <AudioTrimmer 
+                                                audioUrl={selectedTrack.url}
+                                                onTrim={(start, dur) => {
+                                                    setTrimmedInfo({start, duration: dur});
+                                                    setShowTrimmer(false);
+                                                }}
+                                                onCancel={() => setShowTrimmer(false)}
+                                            />
+                                        )}
+
+                                        {showCropper && (mediaType === 'image' ? capturedImage : capturedVideo) && (
+                                            <CropModal 
+                                                image={mediaType === 'image' ? capturedImage! : capturedVideo!} 
+                                                onCropComplete={(pixels) => {
+                                                    console.log("Cropped Area:", pixels);
+                                                    setShowCropper(false);
+                                                    alert("Кадрирование применено!");
+                                                }}
+                                                onClose={() => setShowCropper(false)}
+                                            />
+                                        )}
+
+                                        <div className="editor-footer">
+                                            <button className="back-btn" onClick={() => setStep('CAPTURE')}>Назад</button>
+                                            <button className="next-btn" onClick={() => setStep('FINALIZE')}>Далее</button>
+                                        </div>
+                                        
+                                        {showMusicSelector && (
+                                            <div className="music-selector-overlay glass">
+                                                <header className="music-header">
+                                                    <h4>Выбор музыки</h4>
+                                                    <button onClick={() => setShowMusicSelector(false)}><X size={20} /></button>
+                                                </header>
+                                                <div className="music-list-vertical">
+                                                    {PULSE_LIBRARY.map(track => (
+                                                        <div key={track.id} className="music-row-item" onClick={() => toggleMusic(track)}>
+                                                            <img src={track.cover} alt="" />
+                                                            <div className="track-details">
+                                                                <span className="name">{track.name}</span>
+                                                                <span className="artist">{track.artist}</span>
+                                                            </div>
+                                                            {selectedTrack?.id === track.id && <Play size={16} fill="white" />}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-                            ) : (
+                                ) : (
                                 <div className="finalize-mode">
                                     <header className="finalize-header">
                                         <button className="back-arrow-btn" onClick={() => setMode('camera')}>←</button>
