@@ -214,6 +214,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
           {/* Content View */}
           <main className={`settings-content ${!showCategoryList ? 'v-active' : 'v-hidden'}`}>
             <header className="content-header-top">
+              <div className="header-left-group">
+                {(!showCategoryList || window.innerWidth <= 900) && (
+                  <button className="back-btn-modern" onClick={() => setShowCategoryList(true)}>
+                    <ChevronLeft size={18} /> Назад
+                  </button>
+                )}
+                <h2 className="content-title">{navItems.find(i => i.id === activeTab)?.label}</h2>
+              </div>
               <div className="search-container">
                 <span className="search-icon"><Eye size={16} /></span>
                 <input type="text" placeholder="Найти параметр" />
@@ -222,7 +230,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
             </header>
 
             <div className="content-body">
-              <h2 className="content-title">{navItems.find(i => i.id === activeTab)?.label}</h2>
 
               {/* ====== ГЛАВНАЯ (MAIN) ====== */}
               {activeTab === 'main' && (
@@ -244,25 +251,38 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
                     <div className="settings-list-item" onClick={() => setActiveTab('notifications')}>
                       <div className="item-icon"><Bell size={20} /></div>
                       <div className="item-info">
-                        <span className="label">Уведомления</span>
-                        <span className="sublabel">Звуки, всплывающие сообщения</span>
+                        <span className="label">Звук и уведомления</span>
+                        <span className="sublabel">Громкость, системные звуки, push-уведомления</span>
                       </div>
                       <ChevronRight size={16} />
                     </div>
                     <div className="settings-list-item" onClick={() => setActiveTab('privacy')}>
                       <div className="item-icon"><Shield size={20} /></div>
                       <div className="item-info">
-                        <span className="label">Конфиденциальность и защита</span>
-                        <span className="sublabel">Местоположение, приватность профиля</span>
+                        <span className="label">Конфиденциальность и безопасность</span>
+                        <span className="sublabel">Разрешения камеры, местоположение, права доступа</span>
                       </div>
                       <ChevronRight size={16} />
                     </div>
                   </div>
 
+                  <div className="settings-hero-card" style={{padding: '0', overflow: 'hidden', height: 'auto', flexDirection: 'column', alignItems: 'stretch'}}>
+                    <div style={{padding: '20px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)'}}>
+                      <div className="title" style={{fontSize: '16px'}}>Облачное хранилище Pulse</div>
+                      <div className="subtitle">У вас осталось 15 ГБ свободного места из 50 ГБ</div>
+                    </div>
+                    <div style={{padding: '16px 20px'}}>
+                        <div style={{height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden'}}>
+                            <div style={{width: '30%', height: '100%', background: 'var(--primary-color)'}} />
+                        </div>
+                        <button className="insta-btn" style={{marginTop: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'white'}}>Управление хранилищем</button>
+                    </div>
+                  </div>
+
                   <div className="settings-hero-card" style={{background: 'rgba(112, 0, 255, 0.05)', border: '1px solid rgba(112, 0, 255, 0.2)'}}>
                     <div className="hero-info">
-                      <div className="title" style={{color: 'var(--primary-color)'}}>Получите Pulse Premium</div>
-                      <div className="subtitle">Эксклюзивные маркеры, расширенная аналитика и отсутствие рекламы.</div>
+                      <div className="title" style={{color: 'var(--primary-color)'}}>Pulse Premium</div>
+                      <div className="subtitle">Попробуйте классические возможности Pulse с расширенной аналитикой и эксклюзивными темами.</div>
                       <button className="save-btn" style={{marginTop: '16px', padding: '8px 20px', width: 'auto'}}>Попробовать бесплатно</button>
                     </div>
                   </div>
