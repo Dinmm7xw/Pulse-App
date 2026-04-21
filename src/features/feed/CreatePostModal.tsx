@@ -343,6 +343,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                         >
+                            {step === 'CAPTURE' ? (
                                     <div className="camera-view">
                                         <video ref={videoRef} autoPlay playsInline muted className="camera-video-preview" style={{ filter: activeFilter }} />
                                         <canvas ref={canvasRef} style={{ display: 'none' }} />
