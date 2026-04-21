@@ -273,6 +273,109 @@
 .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .save-btn.success { background: #00E676; }
 
+/* ====== ACCOUNT SETTINGS ====== */
+.account-settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.account-info-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 6px 4px;
+    overflow: hidden;
+}
+
+.account-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+}
+
+.account-info-row:not(:last-child) {
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.account-info-row label {
+    font-size: 14px;
+    color: var(--text-dim);
+}
+
+.account-info-row span {
+    font-weight: 600;
+    color: white;
+}
+
+.premium-status {
+    color: var(--primary-color) !important;
+    background: rgba(112, 0, 255, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 800 !important;
+}
+
+.account-actions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.account-action-btn-row {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.account-action-btn-row:active {
+    transform: scale(0.98);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.danger-zone-pulse {
+    margin-top: 20px;
+    padding: 24px;
+    background: rgba(255, 77, 86, 0.03);
+    border: 1px solid rgba(255, 77, 86, 0.2);
+    border-radius: 20px;
+}
+
+.danger-zone-pulse h4 {
+    color: #ff4d56;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+}
+
+.delete-pulse-btn {
+    width: 100%;
+    padding: 16px;
+    background: rgba(255, 77, 86, 0.1);
+    border: 1px solid rgba(255, 77, 86, 0.2);
+    border-radius: 14px;
+    color: #ff4d56;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.delete-pulse-btn:hover {
+    background: rgba(255, 77, 86, 0.2);
+}
+
 .error-msg {
   color: #ff4d56;
   font-size: 12px;

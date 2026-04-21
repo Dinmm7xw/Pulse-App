@@ -9,6 +9,8 @@ import { Compass, Search, Plus } from 'lucide-react';
 import { PlaceDetails } from './PlaceDetails';
 import { CreateShoutModal } from './CreateShoutModal';
 
+const NEUTRAL_AVATAR = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23555555'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E`;
+
 // Leaflet icon fix
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -49,15 +51,14 @@ export const MapView: React.FC = () => {
         { center: [43.245, 76.88], color: 'var(--accent-color)', radius: 400 },
     ];
 
-    const createFriendIcon = (avatar: string, isUser = false, photoURL?: string) => {
-        const content = photoURL 
-            ? `<img src="${photoURL}" class="marker-avatar-img" />` 
-            : `<span>${avatar}</span>`;
+    const createFriendIcon = (isUser = false, photoURL?: string) => {
+        const urlOrNeutral = photoURL || NEUTRAL_AVATAR;
+        const content = `<img src="${urlOrNeutral}" class="marker-avatar-img" />`;
         return L.divIcon({
             className: 'friend-marker',
             html: `
                 <div class="marker-container ${isUser ? 'is-user' : ''}">
-                    <div class="avatar-circle-inner">
+                    <div class="avatar-circle-inner blur-avatar">
                         ${content}
                     </div>
                     <div class="online-indicator"></div>
@@ -137,12 +138,12 @@ export const MapView: React.FC = () => {
                     </Marker>
                 ))}
 
-                <Marker position={userPos} icon={createFriendIcon('', true, auth.currentUser?.photoURL || '')}>
+                <Marker position={userPos} icon={createFriendIcon(true, auth.currentUser?.photoURL || '')}>
                     <Popup>Это вы - Pulse активен!</Popup>
                 </Marker>
 
                 {friendsLocations.map((f) => (
-                    <Marker key={f.id} position={[f.lat, f.lng]} icon={createFriendIcon('', false, f.photoURL)}>
+                    <Marker key={f.id} position={[f.lat, f.lng]} icon={createFriendIcon(false, f.photoURL)}>
                         <Popup className="friend-popup">
                             <div className="friend-popup-content">
                                 <strong>{f.displayName}</strong>

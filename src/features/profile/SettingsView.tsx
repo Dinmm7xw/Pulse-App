@@ -17,6 +17,9 @@ interface SettingsViewProps {
 
 type SettingsTab = 'profile' | 'account' | 'security' | 'notifications' | 'privacy' | 'terms' | 'about';
 
+// Standard neutral avatar SVG for consistency and professional look
+export const NEUTRAL_AVATAR = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23555555'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E`;
+
 export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab | null>(null);
   const [showCategoryList, setShowCategoryList] = useState(true);
@@ -146,7 +149,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
   };
 
   const navItems = [
-    { id: 'profile', icon: <User size={20} />, label: 'Профиль' },
+    { id: 'profile', icon: <User size={20} />, label: 'Мой профиль' },
+    { id: 'account', icon: <FileText size={20} />, label: 'Учётная запись' },
     { id: 'security', icon: <Lock size={20} />, label: 'Безопасность' },
     { id: 'notifications', icon: <Bell size={20} />, label: 'Уведомления' },
     { id: 'privacy', icon: <Shield size={20} />, label: 'Приватность' },
@@ -213,7 +217,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
                       <div className="large-avatar-circle">
                         {userProfile.photoURL || user?.photoURL ? (
                           <img src={userProfile.photoURL || user?.photoURL || ''} alt="pfp" />
-                        ) : <span style={{ fontSize: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>👤</span>}
+                        ) : <img src={NEUTRAL_AVATAR} alt="pfp" className="neutral-pfp-img" />}
                         <button className="photo-upload-btn" onClick={() => fileInputRef.current?.click()}>
                             <Camera size={16} />
                         </button>
@@ -242,6 +246,44 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
                       {isSaving ? 'Сохранение...' : saveSuccess ? '✓ Сохранено!' : 'Сохранить профиль'}
                     </button>
                     {errorMsg && <p className="error-msg">{errorMsg}</p>}
+                </div>
+              )}
+
+              {/* ====== УЧЁТНАЯ ЗАПИСЬ ====== */}
+              {activeTab === 'account' && (
+                <div className="account-settings-form">
+                    <div className="account-info-box">
+                        <div className="account-info-row">
+                            <label>Email</label>
+                            <span>{user?.email}</span>
+                        </div>
+                        <div className="account-info-row">
+                            <label>Статус аккаунта</label>
+                            <span className="premium-status">Стандартный</span>
+                        </div>
+                    </div>
+
+                    <div className="account-actions-list">
+                        <button className="account-action-btn-row">
+                            <span>Верификация аккаунта</span>
+                            <ChevronRight size={18} />
+                        </button>
+                        <button className="account-action-btn-row">
+                            <span>Скачать мои данные</span>
+                            <ChevronRight size={18} />
+                        </button>
+                    </div>
+
+                    <div className="danger-zone-pulse">
+                        <h4>Управление аккаунтом</h4>
+                        <button className="delete-pulse-btn" onClick={() => {
+                            if(window.confirm("Удалить аккаунт навсегда? Это действие необратимо.")) {
+                                alert("Заявка на удаление принята.");
+                            }
+                        }}>
+                             Удалить учетную запись
+                        </button>
+                    </div>
                 </div>
               )}
 
