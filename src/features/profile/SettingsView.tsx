@@ -2,10 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, Shield, Bell, HelpCircle, X, ChevronRight, 
-  Camera, Lock, LogOut, AppWindow, ChevronLeft
+  Camera, Lock, LogOut, FileText, ChevronLeft, Eye, EyeOff
 } from 'lucide-react';
 import { auth } from '../../lib/firebase';
-import { updateProfile, signOut } from 'firebase/auth';
+import { updateProfile, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { usePulseStore } from '../../store/useStore';
 import { uploadMedia } from '../../lib/upload';
 import './SettingsView.css';
@@ -15,7 +15,7 @@ interface SettingsViewProps {
   onClose: () => void;
 }
 
-type SettingsTab = 'profile' | 'account' | 'security' | 'notifications' | 'privacy' | 'about';
+type SettingsTab = 'profile' | 'account' | 'security' | 'notifications' | 'privacy' | 'terms' | 'about';
 
 export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab | null>(null);
@@ -33,6 +33,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  
+  // Security
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  
+  // Notifications
+  const [pushEnabled, setPushEnabled] = useState(true);
+  const [msgNotif, setMsgNotif] = useState(true);
+  const [likeNotif, setLikeNotif] = useState(true);
+  
+  // Privacy
+  const [hideLocation, setHideLocation] = useState(userProfile.hideLocation || false);
 
   useEffect(() => {
     if (isOpen) {
@@ -41,7 +54,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
             bio: userProfile.bio || '',
             username: userProfile.username || user?.email?.split('@')[0] || ''
         });
-        // On desktop, auto-select profile
+        setHideLocation(userProfile.hideLocation || false);
+        setErrorMsg('');
+        setSaveSuccess(false);
         if (window.innerWidth > 768) {
             setActiveTab('profile');
             setShowCategoryList(true);
@@ -61,8 +76,49 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
       await updateUserProfile({ 
         bio: formData.bio, 
         username: formData.username,
-        displayName: formData.displayName 
+        displayName: formData.displayName,
+        isProfileComplete: true
       });
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (error: any) {
+      setErrorMsg(error.message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!user || !user.email) return;
+    if (newPassword.length < 6) {
+      setErrorMsg('Пароль должен быть минимум 6 символов');
+      return;
+    }
+    setIsSaving(true);
+    setErrorMsg('');
+    try {
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      await reauthenticateWithCredential(user, credential);
+      await updatePassword(user, newPassword);
+      setSaveSuccess(true);
+      setCurrentPassword('');
+      setNewPassword('');
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (error: any) {
+      if (error.code === 'auth/wrong-password') {
+        setErrorMsg('Неверный текущий пароль');
+      } else {
+        setErrorMsg(error.message);
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSavePrivacy = async () => {
+    setIsSaving(true);
+    try {
+      await updateUserProfile({ hideLocation });
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error: any) {
@@ -79,11 +135,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
     try {
         const url = await uploadMedia(file);
         await updateProfile(user, { photoURL: url });
-        await updateUserProfile({ 
-          photoURL: url,
-          // Сразу обновляем и displayName, чтобы данные были синхронны
-          displayName: user.displayName || undefined
-        });
+        await updateUserProfile({ photoURL: url });
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 2000);
     } catch (error: any) {
@@ -95,15 +147,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
 
   const navItems = [
     { id: 'profile', icon: <User size={20} />, label: 'Профиль' },
-    { id: 'account', icon: <AppWindow size={20} />, label: 'Аккаунт' },
     { id: 'security', icon: <Lock size={20} />, label: 'Безопасность' },
     { id: 'notifications', icon: <Bell size={20} />, label: 'Уведомления' },
     { id: 'privacy', icon: <Shield size={20} />, label: 'Приватность' },
+    { id: 'terms', icon: <FileText size={20} />, label: 'Правила и условия' },
     { id: 'about', icon: <HelpCircle size={20} />, label: 'О программе' },
   ];
 
   const handleSelectTab = (tabId: SettingsTab) => {
     setActiveTab(tabId);
+    setErrorMsg('');
+    setSaveSuccess(false);
     if (window.innerWidth <= 768) {
         setShowCategoryList(false);
     }
@@ -127,7 +181,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
             
             <nav className="settings-nav">
               {navItems.map((item) => (
-                <button key={item.id} className={`nav-item ${activeTab === item.id ? 'active' : ''}`} onClick={() => handleSelectTab(item.id as SettingsTab)}>
+                <button key={item.id} className={`settings-nav-item ${activeTab === item.id ? 'active' : ''}`} onClick={() => handleSelectTab(item.id as SettingsTab)}>
                   <div className="nav-item-left">
                     {item.icon} <span>{item.label}</span>
                   </div>
@@ -152,20 +206,21 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
             </header>
 
             <div className="content-body">
+              {/* ====== ПРОФИЛЬ ====== */}
               {activeTab === 'profile' && (
                 <div className="profile-edit-form">
                     <div className="avatar-edit-section">
                       <div className="large-avatar-circle">
                         {userProfile.photoURL || user?.photoURL ? (
                           <img src={userProfile.photoURL || user?.photoURL || ''} alt="pfp" />
-                        ) : <span>👤</span>}
+                        ) : <span style={{ fontSize: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>👤</span>}
                         <button className="photo-upload-btn" onClick={() => fileInputRef.current?.click()}>
-                            <Camera size={20} />
+                            <Camera size={16} />
                         </button>
                       </div>
                       <div className="avatar-info-texts">
                         <h3>{userProfile.displayName || user?.displayName || 'Пользователь'}</h3>
-                        <p>Нажмите на иконку камеры, чтобы загрузить новое фото профиля.</p>
+                        <p>Нажмите на камеру чтобы сменить фото</p>
                       </div>
                     </div>
 
@@ -175,34 +230,193 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
                     </div>
                     <div className="input-group-pulse">
                       <label>Имя пользователя (@)</label>
-                      <input type="text" value={formData.username} onChange={(e) => setFormData({...formData, username: e.target.value})} placeholder="username" />
+                      <input type="text" value={formData.username} onChange={(e) => setFormData({...formData, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')})} placeholder="username" />
                     </div>
                     <div className="input-group-pulse">
                       <label>О себе</label>
-                      <textarea value={formData.bio} onChange={(e) => setFormData({...formData, bio: e.target.value})} rows={3} placeholder="Расскажите о себе..." />
+                      <textarea value={formData.bio} onChange={(e) => setFormData({...formData, bio: e.target.value})} rows={3} placeholder="Расскажите о себе..." maxLength={300} />
+                      <span className="char-count">{formData.bio.length}/300</span>
                     </div>
 
                     <button className={`save-btn ${saveSuccess ? 'success' : ''}`} onClick={handleSaveProfile} disabled={isSaving}>
-                      {isSaving ? 'Сохранение...' : saveSuccess ? 'Изменения сохранены!' : 'Сохранить профиль'}
+                      {isSaving ? 'Сохранение...' : saveSuccess ? '✓ Сохранено!' : 'Сохранить профиль'}
                     </button>
                     {errorMsg && <p className="error-msg">{errorMsg}</p>}
                 </div>
               )}
 
-              {activeTab === 'account' && (
-                <div className="account-info-section">
-                    <p><strong>Email:</strong> {user?.email}</p>
-                    <p style={{ marginTop: '10px', color: '#666', fontSize: '13px' }}>Для смены почты обратитесь в поддержку.</p>
+              {/* ====== БЕЗОПАСНОСТЬ ====== */}
+              {activeTab === 'security' && (
+                <div className="security-edit-form">
+                    <div className="security-info-card">
+                      <p><strong>Email:</strong> {user?.email}</p>
+                      <p className="hint">Аккаунт создан через {user?.providerData[0]?.providerId === 'google.com' ? 'Google' : 'Email/Пароль'}</p>
+                    </div>
+
+                    {user?.providerData[0]?.providerId !== 'google.com' && (
+                      <>
+                        <div className="input-group-pulse">
+                            <label>Текущий пароль</label>
+                            <div className="password-row">
+                              <input type={showPassword ? 'text' : 'password'} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Введите текущий пароль" />
+                              <button className="eye-btn" onClick={() => setShowPassword(!showPassword)}>
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                              </button>
+                            </div>
+                        </div>
+                        <div className="input-group-pulse">
+                            <label>Новый пароль</label>
+                            <input type={showPassword ? 'text' : 'password'} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Минимум 6 символов" />
+                        </div>
+                        <button className={`save-btn ${saveSuccess ? 'success' : ''}`} onClick={handleChangePassword} disabled={isSaving || !currentPassword || !newPassword}>
+                          {isSaving ? 'Обновление...' : saveSuccess ? '✓ Пароль обновлён!' : 'Обновить пароль'}
+                        </button>
+                      </>
+                    )}
+                    {errorMsg && <p className="error-msg">{errorMsg}</p>}
                 </div>
               )}
 
-              {activeTab === 'security' && (
-                <div className="security-edit-form">
-                    <div className="input-group-pulse">
-                        <label>Новый пароль</label>
-                        <input type="password" placeholder="Введите новый пароль" />
+              {/* ====== УВЕДОМЛЕНИЯ ====== */}
+              {activeTab === 'notifications' && (
+                <div className="notifications-form">
+                    <div className="toggle-setting">
+                      <div>
+                        <span className="toggle-label">Push-уведомления</span>
+                        <p className="toggle-desc">Получать уведомления о новых событиях</p>
+                      </div>
+                      <div className={`toggle-switch ${pushEnabled ? 'active' : ''}`} onClick={() => setPushEnabled(!pushEnabled)}>
+                        <div className="toggle-knob" />
+                      </div>
                     </div>
-                    <button className="save-btn">Обновить пароль</button>
+                    <div className="toggle-setting">
+                      <div>
+                        <span className="toggle-label">Сообщения</span>
+                        <p className="toggle-desc">Уведомлять о новых сообщениях в чатах</p>
+                      </div>
+                      <div className={`toggle-switch ${msgNotif ? 'active' : ''}`} onClick={() => setMsgNotif(!msgNotif)}>
+                        <div className="toggle-knob" />
+                      </div>
+                    </div>
+                    <div className="toggle-setting">
+                      <div>
+                        <span className="toggle-label">Лайки</span>
+                        <p className="toggle-desc">Уведомлять когда кто-то лайкнул ваш пост</p>
+                      </div>
+                      <div className={`toggle-switch ${likeNotif ? 'active' : ''}`} onClick={() => setLikeNotif(!likeNotif)}>
+                        <div className="toggle-knob" />
+                      </div>
+                    </div>
+                </div>
+              )}
+
+              {/* ====== ПРИВАТНОСТЬ ====== */}
+              {activeTab === 'privacy' && (
+                <div className="privacy-form">
+                    <div className="toggle-setting">
+                      <div>
+                        <span className="toggle-label">Скрыть местоположение</span>
+                        <p className="toggle-desc">Другие пользователи не увидят вас на карте</p>
+                      </div>
+                      <div className={`toggle-switch ${hideLocation ? 'active' : ''}`} onClick={() => setHideLocation(!hideLocation)}>
+                        <div className="toggle-knob" />
+                      </div>
+                    </div>
+                    <button className={`save-btn ${saveSuccess ? 'success' : ''}`} onClick={handleSavePrivacy} disabled={isSaving} style={{ marginTop: '24px' }}>
+                      {isSaving ? 'Сохранение...' : saveSuccess ? '✓ Сохранено!' : 'Сохранить настройки'}
+                    </button>
+                </div>
+              )}
+
+              {/* ====== ПРАВИЛА И УСЛОВИЯ ====== */}
+              {activeTab === 'terms' && (
+                <div className="legal-content">
+                    <div className="legal-nav-local">
+                        <button className="legal-pill active">Полный кодекс Pulse</button>
+                    </div>
+
+                    <div className="legal-section-box">
+                        <h3>1. Условия использования (Terms of Service)</h3>
+                        <p className="legal-date">Версия 1.1 — Обновлено 21.04.2026</p>
+                        
+                        <div className="legal-block">
+                            <h4>1.1. Принятие условий</h4>
+                            <p>Используя приложение Pulse, вы подтверждаете, что прочитали, поняли и согласны соблюдать данные правила. Приложение предназначено для обмена контентом и доброжелательной коммуникации.</p>
+                        </div>
+
+                        <div className="legal-block">
+                            <h4>1.2. Регистрация и безопасность</h4>
+                            <p>Пользователь несёт единоличную ответственность за все действия, совершённые под его учётной записью. Запрещено использование чужих персональных данных или создание фейковых аккаунтов известных личностей.</p>
+                        </div>
+                    </div>
+
+                    <div className="legal-section-box">
+                        <h3>2. Политика конфиденциальности (Privacy Policy)</h3>
+                        <div className="legal-block">
+                            <h4>2.1. Сбор данных</h4>
+                            <p>Pulse собирает данные о геолокации (для отображения на карте), метаданные контента и информацию о взаимодействиях (лайки, друзья). Мы используем эти данные исключительно для улучшения функциональности приложения.</p>
+                        </div>
+                        <div className="legal-block">
+                            <h4>2.2. Защита информации</h4>
+                            <p>Все сообщения и персональные данные хранятся в зашифрованном виде на серверах Google Firebase. Мы никогда не передаём и не продаём ваши данные третьим лицам или рекламным агентствам.</p>
+                        </div>
+                    </div>
+
+                    <div className="legal-section-box">
+                        <h3>3. Авторские права и контент (Copyright Rules)</h3>
+                        <div className="legal-block">
+                            <h4>3.1. Права на контент пользователя</h4>
+                            <p>Вы сохраняете полное право собственности на любой контент (фото, видео, текст), который вы создаёте и публикуете в Pulse. Размещая контент, вы предоставляете Pulse ограниченную лицензию на техническое отображение и распространение вашего контента внутри платформы.</p>
+                        </div>
+                        <div className="legal-block">
+                            <h4>3.2. Собственность Pulse</h4>
+                            <p>Дизайн, программный код, логотип и бренд Pulse являются интеллектуальной собственностью разработчика (Dinmuhammed). Любое копирование или реверс-инжиниринг платформы без письменного разрешения запрещены.</p>
+                        </div>
+                        <div className="legal-block">
+                            <h4>3.3. Нарушение авторских прав</h4>
+                            <p>Публикация чужого контента без разрешения автора запрещена. Система Pulse автоматически удаляет материалы по жалобе правообладателя после проверки.</p>
+                        </div>
+                    </div>
+
+                    <div className="copyright-block" style={{ marginTop: '30px', opacity: 0.5 }}>
+                        <p>© 2026 Pulse App Ecosystem. All rights reserved.</p>
+                        <p>Designed and Built by Dinmuhammed</p>
+                    </div>
+                </div>
+              )}
+
+              {/* ====== О ПРОГРАММЕ ====== */}
+              {activeTab === 'about' && (
+                <div className="about-section">
+                    <div className="about-logo-block">
+                      <div className="about-logo">P</div>
+                      <h3>Pulse</h3>
+                      <p className="version-text">Версия 1.0.0</p>
+                    </div>
+                    
+                    <div className="about-info-list">
+                      <div className="about-info-item">
+                        <span>Платформа</span>
+                        <span className="value">Progressive Web App</span>
+                      </div>
+                      <div className="about-info-item">
+                        <span>Технологии</span>
+                        <span className="value">React, Firebase, Vite</span>
+                      </div>
+                      <div className="about-info-item">
+                        <span>Разработчик</span>
+                        <span className="value">Dinmuhammed</span>
+                      </div>
+                      <div className="about-info-item">
+                        <span>Год</span>
+                        <span className="value">2026</span>
+                      </div>
+                    </div>
+
+                    <div className="copyright-block">
+                      <p>© 2026 Pulse App. Все права защищены.</p>
+                      <p>Использование данного приложения регулируется условиями, изложенными в разделе «Правила и условия».</p>
+                    </div>
                 </div>
               )}
             </div>

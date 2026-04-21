@@ -72,7 +72,10 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts }) => {
                                 )}
                                 <div className="feed-overlay">
                                     <div className="post-info">
-                                        <h3>{post.user || 'Анонимный пользователь'}</h3>
+                                        <div className="post-header-author">
+                                            <img src={post.userAvatar || `https://api.dicebear.com/7.x/initials/svg?seed=${post.user}`} className="author-avatar-small" alt="" />
+                                            <h3>{post.user || 'Анонимный пользователь'}</h3>
+                                        </div>
                                         <p>{post.desc}</p>
                                         <div className="location-tag glass">
                                             <MapPin size={12} />

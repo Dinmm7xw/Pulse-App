@@ -65,8 +65,10 @@ function App() {
         city = await getCityName(userLocation[0], userLocation[1]);
     }
 
+    const authorName = postData.isAnonymous ? '' : (userProfile.displayName || userProfile.username || user.displayName || user.email?.split('@')[0] || 'User');
+
     addPost({
-      user: postData.isAnonymous ? '' : (user.displayName || user.email?.split('@')[0] || 'User'),
+      user: authorName,
       desc: postData.text,
       likesCount: 0,
       likedBy: [],
