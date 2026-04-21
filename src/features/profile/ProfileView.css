@@ -1,10 +1,14 @@
 .profile-view-insta {
+  max-width: 600px;
+  margin: 0 auto;
   padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 20px);
   background: var(--bg-color);
   min-height: 100dvh;
   color: white;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  border-left: 1px solid var(--glass-border);
+  border-right: 1px solid var(--glass-border);
 }
 
 .insta-header {

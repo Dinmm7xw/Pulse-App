@@ -419,6 +419,24 @@ export const usePulseStore = () => {
     acceptFriendRequest, 
     userProfile,
     updateUserProfile,
-    deletePost
+    deletePost,
+    repostPost: async (postId: string) => {
+        if (!auth.currentUser) return;
+        const userId = auth.currentUser.uid;
+        const userName = userProfile.displayName || userProfile.username || 'User';
+        const postRef = doc(db, "posts", postId);
+        
+        try {
+            const { updateDoc, arrayUnion, increment } = await import('firebase/firestore');
+            await updateDoc(postRef, {
+                repostedBy: arrayUnion(userId),
+                repostedByNames: arrayUnion(userName),
+                repostCount: increment(1)
+            });
+            alert("Пульс репостнут!");
+        } catch (error) {
+            console.error("Error reposting:", error);
+        }
+    }
   };
 };

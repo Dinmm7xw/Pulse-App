@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Heart, MessageCircle, Share2, MoreVertical, Music, MapPin } from 'lucide-react';
+import { Heart, MessageCircle, Share2, MoreVertical, Music, MapPin, Repeat } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
 import type { Post } from '../../types';
 import { auth } from '../../lib/firebase';
 import { ThreadPost } from './ThreadPost';
+import { ShareSheet } from '../../components/ShareSheet';
 import './PulseFeed.css';
 
 interface PulseFeedProps {
@@ -21,6 +22,7 @@ type FeedType = 'following' | 'recommend' | 'anon';
 export const PulseFeed: React.FC<PulseFeedProps> = ({ posts }) => {
     const { likePost } = usePulseStore();
     const [feedType, setFeedType] = useState<FeedType>('recommend');
+    const [sharePostId, setSharePostId] = useState<string | null>(null);
 
     const filteredPosts = posts.filter(post => {
         if (feedType === 'anon') return post.isAnonymous;
@@ -76,6 +78,12 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts }) => {
                                         <img src={post.mediaUrl} className="post-media-bg" alt="Post content" />
                                     )
                                 )}
+                                {post.repostedByNames && post.repostedByNames.length > 0 && (
+                                    <div className="repost-header-tag glass">
+                                        <Repeat size={14} color="#ffcc00" />
+                                        <span>{post.repostedByNames[0]} репостнул(а)</span>
+                                    </div>
+                                )}
                                 <div className="feed-overlay">
                                     <div className="post-info">
                                         <div className="post-header-author">
@@ -103,19 +111,19 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts }) => {
                                             </div>
                                             <span>{post.likesCount || 0}</span>
                                         </div>
-                                        <div className="action-item">
+                                        <div className="action-item" onClick={() => alert('Комментарии скоро будут доступны!')}>
                                             <div className="icon-circle glass">
                                                 <MessageCircle size={28} />
                                             </div>
                                             <span>{post.commentsCount || 0}</span>
                                         </div>
-                                        <div className="action-item">
+                                        <div className="action-item" onClick={() => setSharePostId(post.id)}>
                                             <div className="icon-circle glass">
                                                 <Share2 size={28} />
                                             </div>
                                             <span>Поделиться</span>
                                         </div>
-                                        <div className="action-item">
+                                        <div className="action-item" onClick={() => alert('Опции пульса')}>
                                             <div className="icon-circle glass">
                                                 <MoreVertical size={28} />
                                             </div>
@@ -127,6 +135,12 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts }) => {
                     ))
                 )}
             </div>
+
+            <ShareSheet 
+                isOpen={!!sharePostId} 
+                onClose={() => setSharePostId(null)} 
+                postId={sharePostId || ''} 
+            />
         </div>
     );
 };

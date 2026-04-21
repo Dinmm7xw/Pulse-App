@@ -17,6 +17,9 @@ export interface Post {
   privacy?: 'public' | 'friends' | 'private';
   audioUrl?: string;
   audioName?: string;
+  repostCount?: number;
+  repostedBy?: string[];
+  repostedByNames?: string[];
 }
 
 export interface Shout {
