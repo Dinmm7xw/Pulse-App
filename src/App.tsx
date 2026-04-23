@@ -28,7 +28,7 @@ function App() {
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [isPrivacyCenterOpen, setIsPrivacyCenterOpen] = useState(false);
   const [refreshProfile, setRefreshProfile] = useState(0);
-  const { posts, addPost, userLocation, userProfile } = usePulseStore();
+  const { posts, addPost, userLocation, userProfile, updateLocation } = usePulseStore();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
