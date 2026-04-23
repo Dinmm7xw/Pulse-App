@@ -63,7 +63,10 @@ export const usePulseStore = () => {
         id: doc.id,
         ...doc.data()
       })) as Post[];
+      console.log("🔥 Store: Received posts update", postsData.length);
       setPosts(postsData);
+    }, (error) => {
+      console.error("🔥 Store: Posts listener error", error);
     });
 
     return () => unsubscribe();
@@ -167,17 +170,25 @@ export const usePulseStore = () => {
   const addPost = useCallback(async (newPost: Omit<Post, 'id' | 'timestamp'>) => {
     try {
       const user = auth.currentUser;
-      await addDoc(collection(db, "posts"), {
+      if (!user) throw new Error("No authenticated user");
+      
+      console.log("🔥 Store: Adding new post...", newPost);
+      
+      const docRef = await addDoc(collection(db, "posts"), {
         ...newPost,
-        userId: user?.uid,
-        userAvatar: userProfile.photoURL || user?.photoURL || '',
+        userId: user.uid,
+        userAvatar: userProfile.photoURL || user.photoURL || '',
         likesCount: 0,
         likedBy: [],
         commentsCount: 0,
         timestamp: serverTimestamp()
       });
+      
+      console.log("🔥 Store: Post added successfully with ID:", docRef.id);
+      return true;
     } catch (error) {
       console.error("Error adding post: ", error);
+      return false;
     }
   }, [userProfile.photoURL]);
 

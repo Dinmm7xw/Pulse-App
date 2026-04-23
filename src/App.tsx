@@ -71,7 +71,7 @@ function App() {
 
     const authorName = postData.isAnonymous ? '' : (userProfile.displayName || userProfile.username || user.displayName || user.email?.split('@')[0] || 'User');
 
-    addPost({
+    const success = await addPost({
       user: authorName,
       desc: postData.text,
       likesCount: 0,
@@ -87,8 +87,14 @@ function App() {
       audioUrl: postData.audioUrl,
       audioName: postData.audioName
     });
-    setIsAddModalOpen(false);
-    setActiveTab('explore'); 
+
+    if (success) {
+        alert("Публикация успешно размещена! 🎉");
+        setIsAddModalOpen(false);
+        setActiveTab('explore');
+    } else {
+        alert("Ошибка при публикации. Пожалуйста, попробуйте еще раз.");
+    }
   };
 
   return (
