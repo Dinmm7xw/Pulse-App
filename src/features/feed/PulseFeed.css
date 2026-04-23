@@ -78,6 +78,7 @@
 /* TikTok full-screen layout */
 .feed-scroll-content.full-layout {
     height: 100%;
+    scroll-snap-type: y mandatory;
 }
 
 /* Full Layout Item (TikTok style) */
