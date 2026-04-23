@@ -69,8 +69,8 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
                                 <div className="explore-loading">
                                     <Loader2 className="spin" size={32} />
                                 </div>
-                            ) : searchResults.length > 0 ? (
-                                searchResults.map(user => (
+                            ) : (searchResults || []).length > 0 ? (
+                                (searchResults || []).map(user => (
                                     <div 
                                         key={user.id} 
                                         className="user-search-card glass"

@@ -129,10 +129,10 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
                 </div>
 
                 <div className="insta-post-grid">
-                    {posts.length === 0 ? (
+                    {(posts || []).length === 0 ? (
                         <div className="empty-grid">У пользователя нет публичных постов</div>
                     ) : (
-                        posts.map(post => (
+                        (posts || []).map(post => (
                             <div 
                                 key={post.id} 
                                 className="grid-item" 

@@ -108,12 +108,12 @@ export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSe
             </div>
 
             <div className="insta-post-grid">
-                {activePosts.length === 0 ? (
+                {(activePosts || []).length === 0 ? (
                     <div className="empty-grid">
                         {activeTab === 'anonymous' ? 'У вас нет анонимных публикаций' : 'Нет публикаций. Создай первую!'}
                     </div>
                 ) : (
-                    activePosts.map(post => (
+                    (activePosts || []).map(post => (
                         <div 
                             key={post.id} 
                             className="grid-item" 

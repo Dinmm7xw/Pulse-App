@@ -122,7 +122,8 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile }) =>
                         <p>{feedType === 'anon' ? 'Анонимных пульсов пока нет. Будь первым!' : 'Нет новых публикаций. Будьте первым!'}</p>
                     </div>
                 ) : (
-                    filteredPosts.map((post) => (
+                    <div className="feed-scroll-container">
+                    {(filteredPosts || []).map((post) => (
                         feedType === 'anon' ? (
                             <ThreadPost key={post.id} post={post} />
                         ) : (
