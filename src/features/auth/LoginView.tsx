@@ -39,9 +39,13 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
         const provider = new GoogleAuthProvider();
         try {
             await signInWithPopup(auth, provider);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Login error:", error);
-            alert("Ошибка входа с Google.");
+            if (error.code === 'auth/internal-error' || error.message.includes('storage')) {
+                alert("Ошибка доступа к хранилищу. Попробуйте отключить режим инкогнито или добавьте Pulse на главный экран (установите приложение) для стабильной работы.");
+            } else {
+                alert("Ошибка входа с Google. Попробуйте еще раз.");
+            }
         }
     };
 
