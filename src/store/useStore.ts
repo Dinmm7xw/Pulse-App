@@ -121,16 +121,23 @@ export const usePulseStore = () => {
     const unsubAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         const userId = user.uid;
-
         const qFollowing = query(collection(db, `users/${userId}/following`));
-        unsubFollowing = onSnapshot(qFollowing, (snapshot) => {
-          setFollowingIds(snapshot.docs.map(doc => doc.id));
-        });
+        unsubFollowing = onSnapshot(qFollowing, 
+          (snapshot) => setFollowingIds(snapshot.docs.map(doc => doc.id) || []),
+          (err) => {
+            console.error("Following listener error:", err);
+            setFollowingIds([]);
+          }
+        );
 
         const qFollowers = query(collection(db, `users/${userId}/followers`));
-        unsubFollowers = onSnapshot(qFollowers, (snapshot) => {
-          setFollowersIds(snapshot.docs.map(doc => doc.id));
-        });
+        unsubFollowers = onSnapshot(qFollowers, 
+          (snapshot) => setFollowersIds(snapshot.docs.map(doc => doc.id) || []),
+          (err) => {
+            console.error("Followers listener error:", err);
+            setFollowersIds([]);
+          }
+        );
       }
     });
 
