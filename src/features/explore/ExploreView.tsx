@@ -105,7 +105,26 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
                             exit={{ opacity: 0 }}
                         >
                             <div className="explore-section-title">В тренде</div>
-                            <PulseFeed posts={posts} onViewProfile={onViewProfile} />
+                            <div className="discovery-grid">
+                                {(posts || []).filter(p => !p.isAnonymous).map(post => (
+                                    <div 
+                                        key={post.id} 
+                                        className="discovery-item glass"
+                                        onClick={() => onViewProfile(post.userId)}
+                                    >
+                                        {post.mediaUrl ? (
+                                            <img src={post.mediaUrl} alt="" loading="lazy" />
+                                        ) : (
+                                            <div className="discovery-text-preview" style={{ background: post.color }}>
+                                                <p>{post.desc}</p>
+                                            </div>
+                                        )}
+                                        <div className="discovery-stats-overlay">
+                                            <span>❤️ {post.likesCount || 0}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>

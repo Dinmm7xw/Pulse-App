@@ -343,7 +343,7 @@ export const usePulseStore = () => {
       await setDoc(doc(db, "locations", user.uid), {
         lat,
         lng,
-        displayName: user.displayName || user.email?.split('@')[0],
+        displayName: user.displayName || user.email?.split('@')[0] || 'User',
         photoURL: user.photoURL || '',
         timestamp: serverTimestamp()
       }, { merge: true });
