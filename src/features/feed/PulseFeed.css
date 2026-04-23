@@ -235,3 +235,98 @@
     font-size: 48px;
     opacity: 0.5;
 }
+
+/* Delete Modal */
+.delete-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.delete-modal-content {
+    width: 280px;
+    background: rgba(30, 30, 35, 0.95);
+    border-radius: 24px;
+    padding: 24px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.delete-modal-content h3 {
+    margin: 0 0 10px;
+    font-size: 18px;
+    color: white;
+}
+
+.delete-modal-content p {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 24px;
+}
+
+.delete-modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.delete-modal-actions button {
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+}
+
+.confirm-delete-btn {
+    background: #ff4d56;
+    color: white;
+}
+
+.cancel-btn {
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+}
+
+/* Feed Improvements */
+.feed-back-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.author-badge {
+    color: var(--primary-color);
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(112, 0, 255, 0.5);
+}
+
+.feed-scroll-container {
+    height: 100%;
+}
+
+/* Ensure feed items take full height even when in a wrapper */
+.full-layout .feed-item {
+    height: 100vh;
+    min-height: -webkit-fill-available;
+}
+
+.is-author {
+    border: 1px solid var(--primary-color);
+}

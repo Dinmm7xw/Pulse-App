@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Heart, MessageCircle, Share2, MoreVertical, Music, MapPin, Repeat, Volume2, VolumeX } from 'lucide-react';
+import { Heart, MessageCircle, Share2, MoreVertical, Music, MapPin, Repeat, Volume2, VolumeX, X, Trash2 } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
 import type { Post } from '../../types';
 import { auth } from '../../lib/firebase';
@@ -11,19 +11,21 @@ import './PulseFeed.css';
 interface PulseFeedProps {
     posts: Post[];
     onViewProfile?: (uid: string) => void;
+    onClose?: () => void;
 }
 
 const NEUTRAL_AVATAR = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23555555'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E`;
 
 type FeedType = 'following' | 'recommend' | 'anon';
 
-export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile }) => {
-    const { likePost, followingIds } = usePulseStore();
+export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile, onClose }) => {
+    const { likePost, deletePost, followingIds } = usePulseStore();
     const [feedType, setFeedType] = useState<FeedType>('recommend');
     const [sharePostId, setSharePostId] = useState<string | null>(null);
     const [commentPostId, setCommentPostId] = useState<string | null>(null);
     const [activePostId, setActivePostId] = useState<string | null>(null);
     const [isMuted, setIsMuted] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
     
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const observerRef = useRef<IntersectionObserver | null>(null);
@@ -113,10 +115,30 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile }) =>
                 >
                     Анон
                 </span>
-                <button className="mute-toggle glass" onClick={() => setIsMuted(!isMuted)}>
                     {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
                 </button>
+                {onClose && (
+                    <button className="feed-back-btn glass" onClick={onClose}>
+                        <X size={18} />
+                    </button>
+                )}
             </div>
+
+            {showDeleteConfirm && (
+                <div className="delete-modal-overlay" onClick={() => setShowDeleteConfirm(null)}>
+                    <div className="delete-modal-content glass" onClick={e => e.stopPropagation()}>
+                        <h3>Удалить пульс?</h3>
+                        <p>Это действие нельзя отменить.</p>
+                        <div className="delete-modal-actions">
+                            <button className="cancel-btn" onClick={() => setShowDeleteConfirm(null)}>Отмена</button>
+                            <button className="confirm-delete-btn" onClick={() => {
+                                deletePost(showDeleteConfirm);
+                                setShowDeleteConfirm(null);
+                            }}>Удалить</button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className={`feed-scroll-content ${feedType === 'anon' ? 'threads-layout' : 'full-layout'}`}>
                 {filteredPosts.length === 0 ? (
@@ -194,10 +216,17 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile }) =>
                                             </div>
                                             <span>Поделиться</span>
                                         </div>
-                                        <div className="action-item" onClick={() => alert('Опции пульса')}>
-                                            <div className="icon-circle glass">
+                                        <div className="action-item" onClick={() => {
+                                            if (post.userId === auth.currentUser?.uid) {
+                                                setShowDeleteConfirm(post.id);
+                                            } else {
+                                                alert('Опции пульса');
+                                            }
+                                        }}>
+                                            <div className={`icon-circle glass ${post.userId === auth.currentUser?.uid ? 'is-author' : ''}`}>
                                                 <MoreVertical size={28} />
                                             </div>
+                                            {post.userId === auth.currentUser?.uid && <span className="author-badge">Вы</span>}
                                         </div>
                                         
                                         {/* Spinning Record Disc */}
