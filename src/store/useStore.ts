@@ -417,9 +417,14 @@ export const usePulseStore = () => {
   }, []);
 
   const fetchUserPosts = useCallback(async (uid: string) => {
-    const q = query(collection(db, "posts"), where("userId", "==", uid), where("isAnonymous", "==", false), orderBy("timestamp", "desc"));
-    const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() })) as Post[];
+    try {
+      const q = query(collection(db, "posts"), where("userId", "==", uid), where("isAnonymous", "==", false), orderBy("timestamp", "desc"));
+      const snap = await getDocs(q);
+      return (snap.docs || []).map(d => ({ id: d.id, ...d.data() })) as Post[];
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
   }, []);
 
   return { 
