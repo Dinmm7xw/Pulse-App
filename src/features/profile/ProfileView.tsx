@@ -1,3 +1,4 @@
+import React, { useState, useMemo } from 'react';
 import { Settings, Grid, Bookmark, User as UserIcon, LogOut, ChevronLeft, Heart, MessageCircle, X, Shield, Trash2, Share2 } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
 import { auth } from '../../lib/firebase';
