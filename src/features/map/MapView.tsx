@@ -143,7 +143,7 @@ export const MapView: React.FC = () => {
                     <Popup>Это вы - Pulse активен!</Popup>
                 </Marker>
 
-                {friendsLocations.map((f) => (
+                {(friendsLocations || []).map((f) => (
                     <Marker key={f.id} position={[f.lat, f.lng]} icon={createFriendIcon(false, f.photoURL)}>
                         <Popup className="friend-popup">
                             <div className="friend-popup-content">

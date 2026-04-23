@@ -160,7 +160,7 @@ export const ChatView: React.FC = () => {
                     {!searching && searchResults.length === 0 && userSearchQuery.length >= 2 && (
                         <p style={{ color: '#555', padding: '20px', textAlign: 'center' }}>Пользователи не найдены</p>
                     )}
-                    {searchResults.map((user: any) => (
+                    {(searchResults || []).map((user: any) => (
                         <div key={user.id} className="user-item" onClick={() => handleStartChat(user)}>
                             <img src={user.photoURL || NEUTRAL_AVATAR} alt="" />
                             <div className="user-item-info">
@@ -205,7 +205,7 @@ export const ChatView: React.FC = () => {
 
                 <div className="messages-area-detailed">
                     <div className="system-msg">Сегодня</div>
-                    {messages.map((m) => (
+                    {(messages || []).map((m) => (
                         <div key={m.id} className={`msg-bubble-wrap ${m.senderId === myId ? 'sent' : 'received'}`}>
                             <div className="msg-bubble">
                                 {m.senderId !== myId && activeChat.type === 'community' && (
@@ -270,8 +270,8 @@ export const ChatView: React.FC = () => {
                         ) : 'Чаты не найдены'}
                     </div>
                 ) : (
-                    filteredChats.map(chat => {
-                        const otherUserId = chat.participants?.find((p: string) => p !== myId) || '';
+                    (filteredChats || []).map(chat => {
+                        const otherUserId = (chat.participants || []).find((p: string) => p !== myId) || '';
                         const chatName = chat.participantNames?.[otherUserId] || 'Чат';
                         const chatAvatar = chat.participantAvatars?.[otherUserId] || '';
 
