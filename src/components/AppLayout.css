@@ -12,7 +12,7 @@
     flex: 1;
     position: relative;
     overflow: hidden;
-    padding-bottom: calc(var(--nav-height) + var(--safe-bottom));
+    /* Removed padding to allow full-screen immersive content */
 }
 
 .bottom-nav {
@@ -28,10 +28,10 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    background: rgba(10, 10, 15, 0.92);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .nav-item {
