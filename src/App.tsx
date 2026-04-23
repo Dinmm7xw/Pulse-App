@@ -11,15 +11,18 @@ import { usePulseStore } from './store/useStore';
 import { LoginView } from './features/auth/LoginView';
 import { CompleteProfileView } from './features/auth/CompleteProfileView';
 import { SettingsView } from './features/profile/SettingsView';
+import { ExploreView } from './features/explore/ExploreView';
+import { OtherProfileView } from './features/profile/OtherProfileView';
 import { getCityName } from './lib/geo';
 import { Loader2 } from 'lucide-react';
 
 function App() {
   const [user, setUser] = useState<any>(null);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
-  const [activeTab, setActiveTab] = useState('map');
+   const [activeTab, setActiveTab] = useState('map');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [refreshProfile, setRefreshProfile] = useState(0);
   const { posts, addPost, userLocation, userProfile } = usePulseStore();
 
@@ -84,7 +87,7 @@ function App() {
       audioName: postData.audioName
     });
     setIsAddModalOpen(false);
-    setActiveTab('feed'); 
+    setActiveTab('explore'); 
   };
 
   return (
@@ -95,10 +98,19 @@ function App() {
         onAddClick={() => setIsAddModalOpen(true)}
       >
         {activeTab === 'map' && <MapView />}
-        {activeTab === 'feed' && <PulseFeed posts={posts} />}
+        {activeTab === 'explore' && <ExploreView onViewProfile={setViewingUserId} />}
         {activeTab === 'chats' && <ChatView />}
         {activeTab === 'profile' && <ProfileView onOpenSettings={() => setIsSettingsOpen(true)} />}
       </AppLayout>
+
+      <AnimatePresence>
+        {viewingUserId && (
+          <OtherProfileView 
+            uid={viewingUserId} 
+            onClose={() => setViewingUserId(null)} 
+          />
+        )}
+      </AnimatePresence>
 
       <SettingsView 
         isOpen={isSettingsOpen} 

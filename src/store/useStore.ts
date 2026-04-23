@@ -33,9 +33,9 @@ export const usePulseStore = () => {
   const [shouts, setShouts] = useState<Shout[]>([]);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [friendsLocations, setFriendsLocations] = useState<UserLocation[]>([]);
-  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
-  const [confirmedFriendIds, setConfirmedFriendIds] = useState<string[]>([]);
-  const [userProfile, setUserProfile] = useState<UserProfile>({ bio: '', username: '' });
+  const [followingIds, setFollowingIds] = useState<string[]>([]);
+  const [followersIds, setFollowersIds] = useState<string[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile>({ bio: '', username: '', followersCount: 0, followingCount: 0 });
   const [chats, setChats] = useState<Chat[]>([]);
 
   // Sync profile data from Firestore
@@ -113,37 +113,31 @@ export const usePulseStore = () => {
     };
   }, []);
 
-  // Sync friendship statuses
+  // Sync followers/following
   useEffect(() => {
-    let unsubRequests: () => void;
-    let unsubFriends: () => void;
+    let unsubFollowing: () => void;
+    let unsubFollowers: () => void;
 
     const unsubAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         const userId = user.uid;
 
-        const qRequests = query(collection(db, "friendRequests"), where("to", "==", userId), where("status", "==", "pending"));
-        unsubRequests = onSnapshot(qRequests, (snapshot) => {
-          setFriendRequests(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as FriendRequest[]);
+        const qFollowing = query(collection(db, `users/${userId}/following`));
+        unsubFollowing = onSnapshot(qFollowing, (snapshot) => {
+          setFollowingIds(snapshot.docs.map(doc => doc.id));
         });
 
-        const qFriends = query(collection(db, "friendRequests"), where("status", "==", "accepted"));
-        unsubFriends = onSnapshot(qFriends, (snapshot) => {
-          const ids = snapshot.docs.reduce((acc: string[], doc) => {
-            const data = doc.data();
-            if (data.from === userId) acc.push(data.to);
-            if (data.to === userId) acc.push(data.from);
-            return acc;
-          }, []);
-          setConfirmedFriendIds(ids);
+        const qFollowers = query(collection(db, `users/${userId}/followers`));
+        unsubFollowers = onSnapshot(qFollowers, (snapshot) => {
+          setFollowersIds(snapshot.docs.map(doc => doc.id));
         });
       }
     });
 
     return () => {
       unsubAuth();
-      if (unsubRequests) unsubRequests();
-      if (unsubFriends) unsubFriends();
+      if (unsubFollowing) unsubFollowing();
+      if (unsubFollowers) unsubFollowers();
     };
   }, []);
 
@@ -152,7 +146,7 @@ export const usePulseStore = () => {
     const q = query(collection(db, "locations"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const locationsData = snapshot.docs
-        .filter(doc => confirmedFriendIds.includes(doc.id))
+        .filter(doc => followingIds.includes(doc.id))
         .map(doc => ({
           id: doc.id,
           ...doc.data()
@@ -161,7 +155,7 @@ export const usePulseStore = () => {
     });
 
     return () => unsubscribe();
-  }, [confirmedFriendIds]);
+  }, [followingIds]);
 
   const addPost = useCallback(async (newPost: Omit<Post, 'id' | 'timestamp'>) => {
     try {
@@ -371,30 +365,47 @@ export const usePulseStore = () => {
     }
   }, [syncLocation]);
 
-  const sendFriendRequest = useCallback(async (targetId: string, targetName: string) => {
+  const followUser = useCallback(async (targetUid: string) => {
     if (!auth.currentUser) return;
+    const myId = auth.currentUser.uid;
     try {
-      await addDoc(collection(db, "friendRequests"), {
-        from: auth.currentUser.uid,
-        fromName: auth.currentUser.displayName || 'Пользователь Pulse',
-        to: targetId,
-        targetName,
-        status: 'pending',
-        timestamp: serverTimestamp()
-      });
+      const { increment } = await import('firebase/firestore');
+      // 1. Add to my following
+      await setDoc(doc(db, `users/${myId}/following`, targetUid), { timestamp: serverTimestamp() });
+      // 2. Add to their followers
+      await setDoc(doc(db, `users/${targetUid}/followers`, myId), { timestamp: serverTimestamp() });
+      // 3. Update counts
+      await firestoreUpdateDoc(doc(db, "userProfiles", myId), { followingCount: increment(1) });
+      await firestoreUpdateDoc(doc(db, "userProfiles", targetUid), { followersCount: increment(1) });
     } catch (error) {
-      console.error("Error sending friend request:", error);
+      console.error("Error following user:", error);
     }
   }, []);
 
-  const acceptFriendRequest = useCallback(async (requestId: string) => {
+  const unfollowUser = useCallback(async (targetUid: string) => {
+    if (!auth.currentUser) return;
+    const myId = auth.currentUser.uid;
     try {
-      await firestoreUpdateDoc(doc(db, "friendRequests", requestId), {
-        status: 'accepted'
-      });
+      const { increment } = await import('firebase/firestore');
+      await deleteDoc(doc(db, `users/${myId}/following`, targetUid));
+      await deleteDoc(doc(db, `users/${targetUid}/followers`, myId));
+      await firestoreUpdateDoc(doc(db, "userProfiles", myId), { followingCount: increment(-1) });
+      await firestoreUpdateDoc(doc(db, "userProfiles", targetUid), { followersCount: increment(-1) });
     } catch (error) {
-      console.error("Error accepting request:", error);
+      console.error("Error unfollowing user:", error);
     }
+  }, []);
+
+  const fetchUserProfile = useCallback(async (uid: string) => {
+    const d = await getDocs(query(collection(db, "userProfiles"), where("__name__", "==", uid)));
+    if (!d.empty) return { id: d.docs[0].id, ...d.docs[0].data() } as UserProfile & { id: string };
+    return null;
+  }, []);
+
+  const fetchUserPosts = useCallback(async (uid: string) => {
+    const q = query(collection(db, "posts"), where("userId", "==", uid), where("isAnonymous", "==", false), orderBy("timestamp", "desc"));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() })) as Post[];
   }, []);
 
   return { 
@@ -412,12 +423,12 @@ export const usePulseStore = () => {
     searchUsers,
     userLocation, 
     updateLocation, 
-    friendsLocations, 
-    friendRequests,
-    confirmedFriendIds,
-    sendFriendRequest,
-    acceptFriendRequest, 
-    userProfile,
+    followingIds,
+    followersIds,
+    followUser,
+    unfollowUser,
+    fetchUserProfile,
+    fetchUserPosts,    userProfile,
     updateUserProfile,
     deletePost,
     repostPost: async (postId: string) => {

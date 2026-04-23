@@ -10,9 +10,8 @@ type ProfileTab = 'grid' | 'saved' | 'anonymous';
 const NEUTRAL_AVATAR = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23555555'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E`;
 
 export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSettings }) => {
-    const { posts, friendRequests, acceptFriendRequest, userProfile, deletePost, confirmedFriendIds } = usePulseStore();
+    const { posts, userProfile, deletePost, followersIds, followingIds } = usePulseStore();
     const user = auth.currentUser;
-    const [isRequestsOpen, setIsRequestsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<ProfileTab>('grid');
     const [selectedPost, setSelectedPost] = useState<any | null>(null);
 
@@ -33,8 +32,8 @@ export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSe
     }, [allUserPosts]);
 
     const dynamicRating = useMemo(() => {
-        return (confirmedFriendIds.length * 10) + totalLikes + (publicPosts.length * 5);
-    }, [confirmedFriendIds, totalLikes, publicPosts]);
+        return (followersIds.length * 10) + totalLikes + (publicPosts.length * 5);
+    }, [followersIds, totalLikes, publicPosts]);
 
     const handleDelete = async (postId: string) => {
         if (window.confirm("Вы уверены, что хотите удалить эту публикацию?")) {
@@ -49,29 +48,11 @@ export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSe
                 <button className="icon-btn" onClick={() => window.location.reload()}><ChevronLeft size={24} /></button>
                 <h3>{userProfile.username || user?.displayName || user?.email?.split('@')[0]}</h3>
                 <div className="header-actions">
-                    {friendRequests.length > 0 && <div className="request-dot"></div>}
-                    <button className="icon-btn" onClick={() => setIsRequestsOpen(!isRequestsOpen)}><UserIcon size={22} /></button>
                     <button className="icon-btn" onClick={onOpenSettings}><Settings size={22} /></button>
                 </div>
             </header>
 
-            {isRequestsOpen && (
-                <div className="friend-requests-panel glass">
-                    <h4>Заявки в друзья ({friendRequests.length})</h4>
-                    {friendRequests.length === 0 ? (
-                        <p className="no-req">У вас пока нет новых заявок</p>
-                    ) : (
-                        friendRequests.map(req => (
-                            <div key={req.id} className="request-item">
-                                <span>{req.fromName}</span>
-                                <div className="req-btns">
-                                    <button className="accept-btn" onClick={() => acceptFriendRequest(req.id)}>Принять</button>
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
-            )}
+
 
             <div className="profile-main-info">
                 <div className="profile-avatar-row">
@@ -89,12 +70,12 @@ export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSe
                             <span className="label">Публикации</span>
                         </div>
                         <div className="stat-box">
-                            <span className="count">{confirmedFriendIds.length}</span>
-                            <span className="label">Друзья</span>
+                            <span className="count">{userProfile.followersCount || 0}</span>
+                            <span className="label">Подписчики</span>
                         </div>
                         <div className="stat-box">
-                            <span className="count">{dynamicRating}</span>
-                            <span className="label">Рейтинг</span>
+                            <span className="count">{userProfile.followingCount || 0}</span>
+                            <span className="label">Подписки</span>
                         </div>
                     </div>
                 </div>
@@ -105,8 +86,8 @@ export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSe
                 </div>
 
                 <div className="profile-actions-row">
-                    <button className="insta-btn primary-pulse">Друзья</button>
-                    <button className="insta-btn" onClick={onOpenSettings}>Редактировать</button>
+                    <button className="insta-btn" onClick={onOpenSettings}>Редактировать профиль</button>
+                    <div className="stat-rating-mini">Рейтинг: {dynamicRating}</div>
                 </div>
             </div>
 

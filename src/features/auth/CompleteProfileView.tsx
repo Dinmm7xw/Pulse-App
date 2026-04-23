@@ -46,7 +46,9 @@ export const CompleteProfileView: React.FC<CompleteProfileViewProps> = ({ onComp
                 username: username.trim(),
                 bio: bio.trim(),
                 photoURL: avatarUrl,
-                isProfileComplete: true // Flag to check if they finished onboarding
+                isProfileComplete: true, // Flag to check if they finished onboarding
+                followersCount: 0,
+                followingCount: 0
             });
             
             onComplete();

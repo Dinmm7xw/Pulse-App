@@ -99,4 +99,6 @@ export interface UserProfile {
   hideLocation?: boolean;
   photoURL?: string;
   isProfileComplete?: boolean;
+  followersCount?: number;
+  followingCount?: number;
 }

@@ -1,0 +1,73 @@
+.other-profile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-color);
+    z-index: 6000;
+    display: flex;
+    flex-direction: column;
+}
+
+.other-header {
+    padding: 60px 20px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.other-header h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.other-profile-scroll {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.loading-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #888;
+}
+
+.avatar-placeholder-big {
+    width: 100%;
+    height: 100%;
+    background: #222;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: #444;
+}
+
+.post-detail-overlay-other {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 7000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.primary-pulse {
+    background: var(--primary-color) !important;
+    color: white !important;
+}
+
+.secondary {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+}

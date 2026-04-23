@@ -1,5 +1,5 @@
 import React from 'react';
-import { Map, Compass, Plus, MessageCircle, User } from 'lucide-react';
+import { Map, Search, Plus, MessageCircle, User } from 'lucide-react';
 import './AppLayout.css';
 
 interface NavItemProps {
@@ -36,10 +36,10 @@ export const AppLayout: React.FC<{
                     onClick={() => setActiveTab('map')}
                 />
                 <NavItem
-                    icon={Compass}
-                    label="Рекомендации"
-                    active={activeTab === 'feed'}
-                    onClick={() => setActiveTab('feed')}
+                    icon={Search}
+                    label="Поиск"
+                    active={activeTab === 'explore'}
+                    onClick={() => setActiveTab('explore')}
                 />
                 <div className="nav-add-btn" onClick={onAddClick}>
                     <Plus size={28} color="white" strokeWidth={3} />
