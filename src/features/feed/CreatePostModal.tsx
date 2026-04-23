@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Zap, RefreshCw, Send, Shield, Loader, Camera, Music, Hash, Eye, Lock, Users, Play, Pause } from 'lucide-react';
+import { X, Zap, RefreshCw, Shield, Loader, Camera, Music, Hash, Lock, Users } from 'lucide-react';
 import { auth } from '../../lib/firebase';
 import { uploadMedia } from '../../lib/upload';
-import { PULSE_LIBRARY } from '../../constants/audio';
-import type { PulseTrack } from '../../constants/audio';
-import { AudioTrimmer } from '../../components/AudioTrimmer';
+import { MusicPicker } from '../../components/MusicPicker/MusicPicker';
 import { CropModal } from '../../components/CropModal';
+import type { ItunesTrack } from '../../services/itunes';
 import './CreatePostModal.css';
 
 const NEUTRAL_AVATAR = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23555555'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E`;
@@ -42,10 +41,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
     // TikTok-style settings
     const [hashtags, setHashtags] = useState<string[]>([]);
     const [privacy, setPrivacy] = useState<'public' | 'friends' | 'private'>('public');
-    const [selectedTrack, setSelectedTrack] = useState<PulseTrack | null>(null);
-    const [showMusicSelector, setShowMusicSelector] = useState(false);
-    const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [selectedTrack, setSelectedTrack] = useState<ItunesTrack | null>(null);
+    const [showMusicPicker, setShowMusicPicker] = useState(false);
     
     // Camera settings
     const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
@@ -58,9 +55,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
     const [countdown, setCountdown] = useState(0);
     
     // Editor UI state
-    const [showTrimmer, setShowTrimmer] = useState(false);
     const [showCropper, setShowCropper] = useState(false);
-    const [trimmedInfo, setTrimmedInfo] = useState<{start: number, duration: number} | null>(null);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -244,8 +239,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
             mediaUrl,
             hashtags: parsedTags,
             privacy,
-            audioUrl: selectedTrack?.url,
-            audioName: selectedTrack ? `${selectedTrack.name} — ${selectedTrack.artist}` : undefined
+            audioUrl: selectedTrack?.previewUrl ?? undefined,
+            audioName: selectedTrack ? `${selectedTrack.trackName} — ${selectedTrack.artistName}` : undefined
         });
         
         // Note: Future step is updating addPost to accept additional metadata
@@ -259,35 +254,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
         onClose();
     };
 
-    const toggleMusic = (track: PulseTrack) => {
-        setSelectedTrack(track);
-        setShowMusicSelector(false);
-        setShowTrimmer(true);
-    };
 
-    // Cleanup audio on modal close
-    useEffect(() => {
-        if (!isOpen && audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current = null;
-            setIsAudioPlaying(false);
-        }
-        return () => {
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current = null;
-            }
-        };
-    }, [isOpen]);
-
-    useEffect(() => {
-        return () => {
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current = null;
-            }
-        };
-    }, []);
 
     return (
         <AnimatePresence mode="wait">
@@ -424,17 +391,6 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                                             </button>
                                         </div>
 
-                                        {showTrimmer && selectedTrack && (
-                                            <AudioTrimmer 
-                                                audioUrl={selectedTrack.url}
-                                                onTrim={(start, dur) => {
-                                                    setTrimmedInfo({start, duration: dur});
-                                                    setShowTrimmer(false);
-                                                }}
-                                                onCancel={() => setShowTrimmer(false)}
-                                            />
-                                        )}
-
                                         {showCropper && (mediaType === 'image' ? capturedImage : capturedVideo) && (
                                             <CropModal 
                                                 image={mediaType === 'image' ? capturedImage! : capturedVideo!} 
@@ -451,27 +407,19 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                                             <button className="back-btn" onClick={() => setStep('CAPTURE')}>Назад</button>
                                             <button className="next-btn" onClick={() => setStep('FINALIZE')}>Далее</button>
                                         </div>
-                                        
-                                        {showMusicSelector && (
-                                            <div className="music-selector-overlay glass">
-                                                <header className="music-header">
-                                                    <h4>Выбор музыки</h4>
-                                                    <button onClick={() => setShowMusicSelector(false)}><X size={20} /></button>
-                                                </header>
-                                                <div className="music-list-vertical">
-                                                    {PULSE_LIBRARY.map(track => (
-                                                        <div key={track.id} className="music-row-item" onClick={() => toggleMusic(track)}>
-                                                            <img src={track.cover} alt="" />
-                                                            <div className="track-details">
-                                                                <span className="name">{track.name}</span>
-                                                                <span className="artist">{track.artist}</span>
-                                                            </div>
-                                                            {selectedTrack?.id === track.id && <Play size={16} fill="white" />}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
+
+                                        <AnimatePresence>
+                                            {showMusicPicker && (
+                                                <MusicPicker
+                                                    onSelectTrack={(track) => {
+                                                        setSelectedTrack(track);
+                                                        setShowMusicPicker(false);
+                                                    }}
+                                                    onClose={() => setShowMusicPicker(false)}
+                                                    selectedTrackId={selectedTrack?.trackId}
+                                                />
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 ) : (
                                 <div className="finalize-mode">
@@ -503,35 +451,14 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                                         </div>
 
                                         <div className="settings-list">
-                                            <div className="setting-item" onClick={() => setShowMusicSelector(!showMusicSelector)}>
+                                            <div className="setting-item" onClick={() => setShowMusicPicker(true)}>
                                                 <div className="setting-icon"><Music size={18} /></div>
                                                 <div className="setting-label">
                                                     <span>Музыка</span>
-                                                    <p>{selectedTrack ? `${selectedTrack.name} — ${selectedTrack.artist}` : 'Выбрать звук'}</p>
+                                                    <p>{selectedTrack ? `${selectedTrack.trackName} — ${selectedTrack.artistName}` : 'Выбрать звук'}</p>
                                                 </div>
                                                 <button className="chevron">›</button>
                                             </div>
-
-                                            {showMusicSelector && (
-                                                <div className="music-selector-tray">
-                                                    {PULSE_LIBRARY.map(track => (
-                                                        <div 
-                                                            key={track.id} 
-                                                            className={`music-card ${selectedTrack?.id === track.id ? 'active' : ''}`}
-                                                            onClick={() => toggleMusic(track)}
-                                                        >
-                                                            <div className="track-cover">
-                                                                <img src={track.cover} alt={track.name} />
-                                                                {selectedTrack?.id === track.id && isAudioPlaying ? <Pause size={14} fill="white" /> : <Play size={14} fill="white" />}
-                                                            </div>
-                                                            <div className="track-info">
-                                                                <span className="track-name">{track.name}</span>
-                                                                <span className="track-artist">{track.artist}</span>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
 
                                             <div className="setting-item">
                                                 <div className="setting-icon"><Eye size={18} /></div>
