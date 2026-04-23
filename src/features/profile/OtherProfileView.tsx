@@ -4,6 +4,8 @@ import { usePulseStore } from '../../store/useStore';
 import { auth } from '../../lib/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionsSheet } from '../../components/ConnectionsSheet';
+import { ShareSheet } from '../../components/ShareSheet';
+import { CommentsSheet } from '../../components/CommentsSheet';
 import type { Post, UserProfile } from '../../types';
 import './OtherProfileView.css';
 
@@ -13,13 +15,15 @@ interface OtherProfileViewProps {
 }
 
 export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose }) => {
-    const { fetchUserProfile, fetchUserPosts, followUser, unfollowUser, followingIds, createDirectChat } = usePulseStore();
+    const { fetchUserProfile, fetchUserPosts, followUser, unfollowUser, followingIds, createDirectChat, likePost } = usePulseStore();
     const [profile, setProfile] = useState<(UserProfile & { id: string }) | null>(null);
     const [posts, setPosts] = useState<Post[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'grid' | 'anonymous'>('grid');
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
     const [connectionsModal, setConnectionsModal] = useState<{isOpen: boolean, type: 'followers' | 'following'}>({isOpen: false, type: 'followers'});
+    const [commentPostId, setCommentPostId] = useState<string | null>(null);
+    const [sharePostId, setSharePostId] = useState<string | null>(null);
 
     useEffect(() => {
         const loadData = async () => {
@@ -155,31 +159,62 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
+                        onClick={() => setSelectedPost(null)}
                     >
-                        <div className="detail-header">
-                            <button className="icon-btn" onClick={() => setSelectedPost(null)}><X size={24} /></button>
-                            <h3>Публикация</h3>
-                            <div style={{ width: 40 }} />
-                        </div>
-                        <div className="detail-content">
-                            {selectedPost.mediaUrl ? (
-                                <img src={selectedPost.mediaUrl} alt="" className="detail-img" />
-                            ) : (
-                                <div className="detail-text" style={{ background: selectedPost.color }}>
-                                    <p>{selectedPost.desc}</p>
-                                </div>
-                            )}
-                            <div className="detail-actions">
-                                <div className="action-btn"><Heart size={24} /> <span>{selectedPost.likesCount || 0}</span></div>
-                                <div className="action-btn"><MessageCircle size={24} /> <span>{selectedPost.commentsCount || 0}</span></div>
+                        <div className="post-detail-modal-modern glass" onClick={e => e.stopPropagation()}>
+                            <div className="detail-header">
+                                <button className="icon-btn" onClick={() => setSelectedPost(null)}><X size={24} /></button>
+                                <h3>Публикация</h3>
+                                <div style={{ width: 40 }} />
                             </div>
-                            <div className="detail-info">
-                                <p><strong>{profile.username}</strong> {selectedPost.desc}</p>
+                            <div className="detail-content">
+                                <div className="detail-media-wrap">
+                                    {selectedPost.mediaUrl ? (
+                                        selectedPost.mediaUrl.includes('/video/upload/') ? (
+                                            <video src={selectedPost.mediaUrl} controls autoPlay loop />
+                                        ) : (
+                                            <img src={selectedPost.mediaUrl} alt="" className="detail-img" />
+                                        )
+                                    ) : (
+                                        <div className="detail-text" style={{ background: selectedPost.color }}>
+                                            <p>{selectedPost.desc}</p>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="detail-actions">
+                                    <div className="action-btn" onClick={() => likePost(selectedPost.id)}>
+                                        <Heart size={24} color={(selectedPost.likedBy || []).includes(auth.currentUser?.uid) ? "#ff4d56" : "white"} fill={(selectedPost.likedBy || []).includes(auth.currentUser?.uid) ? "#ff4d56" : "none"} /> 
+                                        <span>{selectedPost.likesCount || 0}</span>
+                                    </div>
+                                    <div className="action-btn" onClick={() => setCommentPostId(selectedPost.id)}>
+                                        <MessageCircle size={24} /> 
+                                        <span>{selectedPost.commentsCount || 0}</span>
+                                    </div>
+                                    <div className="action-btn" onClick={() => setSharePostId(selectedPost.id)}>
+                                        <Share2 size={24} />
+                                        <span>Share</span>
+                                    </div>
+                                </div>
+                                <div className="detail-info">
+                                    <p><strong>{profile.username}</strong> {selectedPost.desc}</p>
+                                </div>
                             </div>
                         </div>
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <ShareSheet 
+                isOpen={!!sharePostId} 
+                onClose={() => setSharePostId(null)} 
+                postId={sharePostId || ''} 
+            />
+
+            <CommentsSheet
+                isOpen={!!commentPostId}
+                onClose={() => setCommentPostId(null)}
+                postId={commentPostId || ''}
+            />
 
             <ConnectionsSheet 
                 isOpen={connectionsModal.isOpen}

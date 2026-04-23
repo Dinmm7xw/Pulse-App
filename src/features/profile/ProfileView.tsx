@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
-import { Settings, Grid, Bookmark, User as UserIcon, LogOut, ChevronLeft, Heart, MessageCircle, X, Shield, Trash2 } from 'lucide-react';
+import { Settings, Grid, Bookmark, User as UserIcon, LogOut, ChevronLeft, Heart, MessageCircle, X, Shield, Trash2, Share2 } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
 import { auth } from '../../lib/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionsSheet } from '../../components/ConnectionsSheet';
+import { CommentsSheet } from '../../components/CommentsSheet';
+import { ShareSheet } from '../../components/ShareSheet';
 import './ProfileView.css';
 
 type ProfileTab = 'grid' | 'saved' | 'anonymous';
@@ -11,11 +12,13 @@ type ProfileTab = 'grid' | 'saved' | 'anonymous';
 const NEUTRAL_AVATAR = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23555555'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E`;
 
 export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSettings }) => {
-    const { posts, userProfile, deletePost, followersIds, followingIds } = usePulseStore();
+    const { posts, userProfile, deletePost, followersIds, followingIds, likePost } = usePulseStore();
     const user = auth.currentUser;
     const [activeTab, setActiveTab] = useState<ProfileTab>('grid');
     const [selectedPost, setSelectedPost] = useState<any | null>(null);
     const [connectionsModal, setConnectionsModal] = useState<{isOpen: boolean, type: 'followers' | 'following'}>({isOpen: false, type: 'followers'});
+    const [commentPostId, setCommentPostId] = useState<string | null>(null);
+    const [sharePostId, setSharePostId] = useState<string | null>(null);
 
     // All posts by current user
     const allUserPosts = useMemo(() => posts.filter(p => p.userId === user?.uid), [posts, user]);
@@ -144,33 +147,50 @@ export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSe
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
+                        onClick={() => setSelectedPost(null)}
                     >
-                        <div className="post-detail-modal glass">
+                        <div className="post-detail-modal glass" onClick={e => e.stopPropagation()}>
                             <header className="post-modal-header">
                                 <button className="close-post-btn" onClick={() => setSelectedPost(null)}><X size={24} /></button>
+                                <h3>Публикация</h3>
                                 <button className="delete-post-btn" onClick={() => handleDelete(selectedPost.id)}><Trash2 size={22} /></button>
                             </header>
                             
                             <div className="post-detail-content">
-                                {selectedPost.mediaUrl ? (
-                                    selectedPost.mediaUrl.includes('/video/upload/') ? (
-                                        <video src={selectedPost.mediaUrl} controls autoPlay />
+                                <div className="post-detail-media-wrap">
+                                    {selectedPost.mediaUrl ? (
+                                        selectedPost.mediaUrl.includes('/video/upload/') ? (
+                                            <video src={selectedPost.mediaUrl} controls autoPlay loop />
+                                        ) : (
+                                            <img src={selectedPost.mediaUrl} alt="Post" />
+                                        )
                                     ) : (
-                                        <img src={selectedPost.mediaUrl} alt="Post" />
-                                    )
-                                ) : (
-                                    <div className="post-typography-card" style={{ background: selectedPost.color || 'linear-gradient(45deg, #121217, #000)' }}>
-                                        <p>{selectedPost.text || selectedPost.desc}</p>
-                                    </div>
-                                )}
+                                        <div className="post-typography-card" style={{ background: selectedPost.color || 'linear-gradient(45deg, #121217, #000)' }}>
+                                            <p>{selectedPost.text || selectedPost.desc}</p>
+                                        </div>
+                                    )}
+                                </div>
                                 <div className="post-detail-info">
                                     <div className="post-header-mini">
-                                        <strong>{selectedPost.isAnonymous ? 'Анонимно' : (userProfile.username || 'user')}</strong>
-                                        <p>{selectedPost.desc || selectedPost.text}</p>
+                                        <div className="mini-author-info">
+                                            <img src={userProfile.photoURL || NEUTRAL_AVATAR} className="mini-avatar" alt="" />
+                                            <strong>{selectedPost.isAnonymous ? 'Анонимно' : (userProfile.username || 'user')}</strong>
+                                        </div>
+                                        <p className="detail-desc">{selectedPost.desc || selectedPost.text}</p>
                                     </div>
                                     <div className="post-footer-actions">
-                                        <div className="action-item"><Heart size={24} color={(selectedPost.likedBy || []).includes(user?.uid) ? "#ff4d56" : "white"} fill={(selectedPost.likedBy || []).includes(user?.uid) ? "#ff4d56" : "none"} /> <span>{selectedPost.likesCount || 0}</span></div>
-                                        <div className="action-item"><MessageCircle size={24} /> <span>{selectedPost.commentsCount || 0}</span></div>
+                                        <div className="action-item" onClick={() => likePost(selectedPost.id)}>
+                                            <Heart size={24} color={(selectedPost.likedBy || []).includes(user?.uid) ? "#ff4d56" : "white"} fill={(selectedPost.likedBy || []).includes(user?.uid) ? "#ff4d56" : "none"} /> 
+                                            <span>{selectedPost.likesCount || 0}</span>
+                                        </div>
+                                        <div className="action-item" onClick={() => setCommentPostId(selectedPost.id)}>
+                                            <MessageCircle size={24} /> 
+                                            <span>{selectedPost.commentsCount || 0}</span>
+                                        </div>
+                                        <div className="action-item" onClick={() => setSharePostId(selectedPost.id)}>
+                                            <Share2 size={24} />
+                                            <span>Share</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -178,6 +198,18 @@ export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSe
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <ShareSheet 
+                isOpen={!!sharePostId} 
+                onClose={() => setSharePostId(null)} 
+                postId={sharePostId || ''} 
+            />
+
+            <CommentsSheet
+                isOpen={!!commentPostId}
+                onClose={() => setCommentPostId(null)}
+                postId={commentPostId || ''}
+            />
 
             <button className="logout-insta-btn" onClick={() => auth.signOut()}>
                 <LogOut size={18} /> Выйти из аккаунта

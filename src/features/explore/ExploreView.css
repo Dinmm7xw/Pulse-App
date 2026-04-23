@@ -146,14 +146,88 @@
     z-index: 1;
 }
 
-/* Ensure the header stays on top */
+.discovery-grid-container {
+    padding-top: 10px;
+    padding-bottom: 20px;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.discovery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    padding: 0 2px;
+}
+
+.discovery-item {
+    aspect-ratio: 9/16;
+    position: relative;
+    overflow: hidden;
+    background: #111;
+    cursor: pointer;
+}
+
+.discovery-item img, .discovery-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.discovery-text-preview {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.discovery-text-preview p {
+    font-size: 10px;
+    color: white;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.discovery-overlay {
+    position: absolute;
+    bottom: 8px;
+    left: 8px;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.immersive-feed-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: black;
+}
+
+/* Ensure the header stays on top when searching but not in immersive feed */
 .explore-header {
     background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-bottom: none;
 }
 
 .explore-section-title {
-    display: none; /* Hide title in feed mode */
+    padding: 10px 20px;
+    font-size: 18px;
+    font-weight: 800;
+    color: white;
 }
 

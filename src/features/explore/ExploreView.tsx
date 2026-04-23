@@ -15,6 +15,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
+    const [activePostId, setActivePostId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!searchQuery.trim()) {
@@ -40,6 +41,9 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
             await followUser(userId);
         }
     };
+
+    // Filter posts for recommendation (non-anon)
+    const recommendedPosts = posts.filter(p => !p.isAnonymous);
 
     return (
         <div className="explore-view">
@@ -99,15 +103,57 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
                         </motion.div>
                     ) : (
                         <motion.div 
-                            key="trending-feed"
+                            key="discovery-grid"
+                            className="discovery-grid-container"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                         >
                             <div className="explore-section-title">В тренде</div>
-                            <div className="explore-feed-wrapper">
-                                <PulseFeed posts={posts} onViewProfile={onViewProfile} />
+                            <div className="discovery-grid">
+                                {recommendedPosts.map((post) => (
+                                    <div 
+                                        key={post.id} 
+                                        className="discovery-item"
+                                        onClick={() => setActivePostId(post.id)}
+                                    >
+                                        {post.mediaUrl ? (
+                                            post.mediaUrl.includes('/video/upload/') ? (
+                                                <video src={post.mediaUrl} muted playsInline />
+                                            ) : (
+                                                <img src={post.mediaUrl} alt="" />
+                                            )
+                                        ) : (
+                                            <div className="discovery-text-preview" style={{ background: post.color }}>
+                                                <p>{post.desc}</p>
+                                            </div>
+                                        )}
+                                        <div className="discovery-overlay">
+                                            <span>❤️ {post.likesCount || 0}</span>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Immersive Feed Overlay */}
+                <AnimatePresence>
+                    {activePostId && (
+                        <motion.div 
+                            className="immersive-feed-overlay"
+                            initial={{ y: '100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                        >
+                            <PulseFeed 
+                                posts={recommendedPosts} 
+                                onViewProfile={onViewProfile} 
+                                onClose={() => setActivePostId(null)}
+                                initialPostId={activePostId}
+                            />
                         </motion.div>
                     )}
                 </AnimatePresence>
