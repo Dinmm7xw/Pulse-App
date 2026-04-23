@@ -3,6 +3,7 @@ import { auth } from '../../lib/firebase';
 import { GoogleAuthProvider, signInWithPopup, RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import type { ConfirmationResult } from 'firebase/auth';
 import { Phone, Mail, Search as Google, ArrowLeft, Loader2 } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import './LoginView.css';
 
 interface LoginViewProps {
@@ -36,12 +37,16 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
     }, [mode]);
 
     const loginWithGoogle = async () => {
+        const isNative = Capacitor.isNativePlatform();
         const provider = new GoogleAuthProvider();
+        
         try {
             await signInWithPopup(auth, provider);
         } catch (error: any) {
             console.error("Login error:", error);
-            if (error.code === 'auth/internal-error' || error.message.includes('storage')) {
+            if (isNative) {
+                alert("Для входа через Android Studio убедитесь, что вы добавили SHA-1 ключ в консоль Firebase. Также в нативных приложениях рекомендуется использовать signInWithRedirect или специальный плагин.");
+            } else if (error.code === 'auth/internal-error' || error.message.includes('storage')) {
                 alert("Ошибка доступа к хранилищу. Попробуйте отключить режим инкогнито или добавьте Pulse на главный экран (установите приложение) для стабильной работы.");
             } else {
                 alert("Ошибка входа с Google. Попробуйте еще раз.");
