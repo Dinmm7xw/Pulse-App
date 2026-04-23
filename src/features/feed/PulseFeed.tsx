@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Heart, MessageCircle, Share2, MoreVertical, Music, MapPin, Repeat, Volume2, VolumeX, X, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle, Share2, MoreVertical, Music, MapPin, Repeat, Volume2, VolumeX, X } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
 import type { Post } from '../../types';
 import { auth } from '../../lib/firebase';
@@ -68,7 +68,7 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile, onCl
         }
 
         const activePost = filteredPosts.find(p => p.id === activePostId);
-        const targetUrl = activePost?.musicUrl || activePost?.audioUrl;
+        const targetUrl = activePost?.audioUrl;
         
         if (targetUrl && !isMuted) {
             if (audioRef.current.src !== targetUrl) {
@@ -115,6 +115,7 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile, onCl
                 >
                     Анон
                 </span>
+                <button className="mute-toggle glass" onClick={() => setIsMuted(!isMuted)}>
                     {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
                 </button>
                 {onClose && (
@@ -230,7 +231,7 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile, onCl
                                         </div>
                                         
                                         {/* Spinning Record Disc */}
-                                        {(post.musicUrl || post.audioUrl) && (
+                                        {post.audioUrl && (
                                             <div className={`music-disc-wrap ${activePostId === post.id && !isMuted ? 'spinning' : ''}`}>
                                                 <div className="music-disc">
                                                     <img src={post.userAvatar || NEUTRAL_AVATAR} alt="" />
