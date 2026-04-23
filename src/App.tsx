@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { auth } from './lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AppLayout } from './components/AppLayout';
 import { MapView } from './features/map/MapView';
 import { PulseFeed } from './features/feed/PulseFeed';

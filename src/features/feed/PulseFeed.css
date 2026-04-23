@@ -37,6 +37,22 @@
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
+.mute-toggle {
+    background: none;
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: 10px;
+    opacity: 0.8;
+}
+
+.mute-toggle:hover {
+    opacity: 1;
+}
+
 .feed-scroll-content {
     flex: 1;
     overflow-y: auto;
