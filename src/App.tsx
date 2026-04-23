@@ -14,6 +14,8 @@ import { CompleteProfileView } from './features/auth/CompleteProfileView';
 import { SettingsView } from './features/profile/SettingsView';
 import { ExploreView } from './features/explore/ExploreView';
 import { OtherProfileView } from './features/profile/OtherProfileView';
+import { PrivacyCenter } from './features/profile/PrivacyCenter';
+import { NotFoundView } from './components/NotFoundView';
 import { getCityName } from './lib/geo';
 import { Loader2 } from 'lucide-react';
 
@@ -24,6 +26,7 @@ function App() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
+  const [isPrivacyCenterOpen, setIsPrivacyCenterOpen] = useState(false);
   const [refreshProfile, setRefreshProfile] = useState(0);
   const { posts, addPost, userLocation, userProfile } = usePulseStore();
 
@@ -131,7 +134,14 @@ function App() {
       <SettingsView 
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
+        onOpenPrivacy={() => setIsPrivacyCenterOpen(true)}
       />
+
+      <AnimatePresence>
+        {isPrivacyCenterOpen && (
+          <PrivacyCenter onClose={() => setIsPrivacyCenterOpen(false)} />
+        )}
+      </AnimatePresence>
 
       <CreatePostModal
         isOpen={isAddModalOpen}

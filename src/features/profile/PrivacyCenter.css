@@ -1,0 +1,190 @@
+:root {
+    --privacy-bg: #ffffff;
+    --privacy-text: #1c1e21;
+    --privacy-accent: #0064e0;
+    --privacy-card-bg: #f0f2f5;
+    --privacy-border: #dddfe2;
+}
+
+.privacy-center-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--privacy-bg);
+    z-index: 2000;
+    overflow-y: auto;
+    color: var(--privacy-text);
+    font-family: 'Outfit', sans-serif;
+}
+
+.privacy-header {
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--privacy-border);
+    z-index: 10;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-right: 1rem;
+    transition: background 0.2s;
+}
+
+.back-btn:hover {
+    background: var(--privacy-card-bg);
+}
+
+.privacy-hero {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    background: linear-gradient(180deg, #f0f7ff 0%, #ffffff 100%);
+}
+
+.hero-img {
+    width: 240px;
+    height: 240px;
+    object-fit: contain;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 20px 40px rgba(0, 100, 224, 0.2));
+}
+
+.privacy-hero h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--privacy-accent);
+}
+
+.privacy-hero p {
+    font-size: 1.1rem;
+    color: #65676b;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.privacy-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+}
+
+.privacy-section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 4rem;
+}
+
+.privacy-card {
+    background: var(--privacy-card-bg);
+    padding: 1.5rem;
+    border-radius: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.privacy-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+    border-color: var(--privacy-accent);
+}
+
+.card-icon-wrap {
+    width: 48px;
+    height: 48px;
+    background: #fff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    color: var(--privacy-accent);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.privacy-card h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.privacy-card p {
+    font-size: 0.95rem;
+    color: #65676b;
+    line-height: 1.4;
+}
+
+.detailed-section {
+    margin-top: 4rem;
+    border-top: 1px solid var(--privacy-border);
+    padding-top: 3rem;
+}
+
+.detailed-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.accordion-item {
+    border: 1px solid var(--privacy-border);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.accordion-header {
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: #fff;
+    transition: background 0.2s;
+}
+
+.accordion-header:hover {
+    background: #f8f9fa;
+}
+
+.accordion-content {
+    padding: 1.5rem;
+    background: #fff;
+    border-top: 1px solid var(--privacy-border);
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #4b4b4b;
+}
+
+.footer-privacy {
+    text-align: center;
+    padding: 4rem 1.5rem;
+    background: #f0f2f5;
+    margin-top: 4rem;
+}
+
+.footer-privacy p {
+    color: #65676b;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+    .privacy-hero h1 {
+        font-size: 1.8rem;
+    }
+    .privacy-section-grid {
+        grid-template-columns: 1fr;
+    }
+}

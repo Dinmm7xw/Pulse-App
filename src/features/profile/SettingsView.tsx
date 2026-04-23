@@ -13,6 +13,7 @@ import './SettingsView.css';
 interface SettingsViewProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpenPrivacy?: () => void;
 }
 
 type SettingsTab = 'main' | 'profile' | 'account' | 'security' | 'notifications' | 'privacy' | 'terms' | 'about';
@@ -20,7 +21,7 @@ type SettingsTab = 'main' | 'profile' | 'account' | 'security' | 'notifications'
 // Standard neutral avatar SVG for consistency and professional look
 export const NEUTRAL_AVATAR = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23555555'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E`;
 
-export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) => {
+export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onOpenPrivacy }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab | null>(null);
   const [showCategoryList, setShowCategoryList] = useState(true);
   const { userProfile, updateUserProfile } = usePulseStore();
@@ -456,9 +457,18 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose }) =
                           </div>
                         </div>
                     </div>
-                    <button className={`save-btn ${saveSuccess ? 'success' : ''}`} onClick={handleSavePrivacy} disabled={isSaving} style={{ marginTop: '24px' }}>
-                      {isSaving ? 'Сохранение...' : saveSuccess ? '✓ Сохранено!' : 'Сохранить настройки'}
-                    </button>
+                    <div className="settings-group-card" style={{padding: '24px', background: 'linear-gradient(135deg, rgba(0, 100, 224, 0.1), transparent)', border: '1px solid rgba(0, 100, 224, 0.2)', marginTop: '20px'}}>
+                        <div style={{display: 'flex', alignItems: 'center', marginBottom: '16px'}}>
+                            <Shield size={32} color="var(--privacy-accent)" style={{marginRight: '16px'}} />
+                            <div>
+                                <h4 style={{margin: 0, fontSize: '16px'}}>Центр конфиденциальности</h4>
+                                <p style={{margin: 0, fontSize: '13px', opacity: 0.7}}>Управляйте своими данными как в Instagram</p>
+                            </div>
+                        </div>
+                        <button className="go-home-btn" style={{width: '100%', padding: '12px'}} onClick={onOpenPrivacy}>
+                            Открыть Центр конфиденциальности
+                        </button>
+                    </div>
                 </div>
               )}
 
