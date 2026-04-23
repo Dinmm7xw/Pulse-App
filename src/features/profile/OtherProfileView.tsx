@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronLeft, Grid, Shield, Heart, MessageCircle, X, UserPlus, UserCheck, MessageSquare } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
 import { auth } from '../../lib/firebase';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ConnectionsSheet } from '../../components/ConnectionsSheet';
 import type { Post, UserProfile } from '../../types';
 import './OtherProfileView.css';
 
@@ -18,6 +18,7 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'grid' | 'anonymous'>('grid');
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+    const [connectionsModal, setConnectionsModal] = useState<{isOpen: boolean, type: 'followers' | 'following'}>({isOpen: false, type: 'followers'});
 
     useEffect(() => {
         const loadData = async () => {
@@ -90,11 +91,11 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
                                 <span className="count">{posts.length}</span>
                                 <span className="label">Посты</span>
                             </div>
-                            <div className="stat-box">
+                            <div className="stat-box" onClick={() => setConnectionsModal({isOpen: true, type: 'followers'})}>
                                 <span className="count">{profile.followersCount || 0}</span>
                                 <span className="label">Подписчики</span>
                             </div>
-                            <div className="stat-box">
+                            <div className="stat-box" onClick={() => setConnectionsModal({isOpen: true, type: 'following'})}>
                                 <span className="count">{profile.followingCount || 0}</span>
                                 <span className="label">Подписки</span>
                             </div>
@@ -178,6 +179,13 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            <ConnectionsSheet 
+                isOpen={connectionsModal.isOpen}
+                type={connectionsModal.type}
+                userId={uid}
+                onClose={() => setConnectionsModal({...connectionsModal, isOpen: false})}
+            />
         </motion.div>
     );
 };

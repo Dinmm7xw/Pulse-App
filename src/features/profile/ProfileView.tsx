@@ -3,6 +3,7 @@ import { Settings, Grid, Bookmark, User as UserIcon, LogOut, ChevronLeft, Heart,
 import { usePulseStore } from '../../store/useStore';
 import { auth } from '../../lib/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ConnectionsSheet } from '../../components/ConnectionsSheet';
 import './ProfileView.css';
 
 type ProfileTab = 'grid' | 'saved' | 'anonymous';
@@ -14,6 +15,7 @@ export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSe
     const user = auth.currentUser;
     const [activeTab, setActiveTab] = useState<ProfileTab>('grid');
     const [selectedPost, setSelectedPost] = useState<any | null>(null);
+    const [connectionsModal, setConnectionsModal] = useState<{isOpen: boolean, type: 'followers' | 'following'}>({isOpen: false, type: 'followers'});
 
     // All posts by current user
     const allUserPosts = useMemo(() => posts.filter(p => p.userId === user?.uid), [posts, user]);
@@ -69,11 +71,11 @@ export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSe
                             <span className="count">{publicPosts.length}</span>
                             <span className="label">Публикации</span>
                         </div>
-                        <div className="stat-box">
+                        <div className="stat-box" onClick={() => setConnectionsModal({isOpen: true, type: 'followers'})}>
                             <span className="count">{userProfile.followersCount || 0}</span>
                             <span className="label">Подписчики</span>
                         </div>
-                        <div className="stat-box">
+                        <div className="stat-box" onClick={() => setConnectionsModal({isOpen: true, type: 'following'})}>
                             <span className="count">{userProfile.followingCount || 0}</span>
                             <span className="label">Подписки</span>
                         </div>
@@ -180,6 +182,12 @@ export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSe
             <button className="logout-insta-btn" onClick={() => auth.signOut()}>
                 <LogOut size={18} /> Выйти из аккаунта
             </button>
+            <ConnectionsSheet 
+                isOpen={connectionsModal.isOpen}
+                type={connectionsModal.type}
+                userId={auth.currentUser?.uid || ''}
+                onClose={() => setConnectionsModal({...connectionsModal, isOpen: false})}
+            />
         </div>
     );
 };
