@@ -77,7 +77,7 @@ function App() {
       likesCount: 0,
       likedBy: [],
       commentsCount: 0,
-      location: 'Алматы',
+      location: city,
       city: city,
       color: 'linear-gradient(135deg, #7000FF, #00D1FF)',
       mediaUrl: postData.mediaUrl,
@@ -102,10 +102,19 @@ function App() {
       <AppLayout
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onAddClick={() => setIsAddModalOpen(true)}
+        onAddClick={() => {
+          updateLocation();
+          setIsAddModalOpen(true);
+        }}
       >
         {activeTab === 'map' && <MapView />}
-        {activeTab === 'explore' && <ExploreView onViewProfile={setViewingUserId} />}
+        {activeTab === 'explore' && <ExploreView onViewProfile={(uid) => {
+          if (uid === auth.currentUser?.uid) {
+            setActiveTab('profile');
+          } else {
+            setViewingUserId(uid);
+          }
+        }} />}
         {activeTab === 'chats' && <ChatView />}
         {activeTab === 'profile' && <ProfileView onOpenSettings={() => setIsSettingsOpen(true)} />}
       </AppLayout>
