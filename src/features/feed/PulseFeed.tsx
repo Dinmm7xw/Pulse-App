@@ -79,13 +79,21 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile, onCl
         }
 
         const activePost = filteredPosts.find(p => p.id === activePostId);
-        const targetUrl = activePost?.audioUrl;
+        // Fallback to musicUrl for legacy posts
+        const targetUrl = activePost?.audioUrl || (activePost as any)?.musicUrl;
         
+        console.log("Feed Audio:", { activePostId, targetUrl, isMuted });
+
         if (targetUrl && !isMuted) {
             if (audioRef.current.src !== targetUrl) {
+                audioRef.current.pause();
                 audioRef.current.src = targetUrl;
+                audioRef.current.load();
             }
-            audioRef.current.play().catch(e => console.log("Audio play blocked by browser", e));
+            audioRef.current.play().catch(e => {
+                console.warn("Audio play blocked or failed:", e);
+                // Try again on next interaction or state change
+            });
         } else {
             audioRef.current.pause();
         }
@@ -103,6 +111,11 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile, onCl
             }
         });
 
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+            }
+        };
     }, [activePostId, isMuted, filteredPosts]);
 
     return (
