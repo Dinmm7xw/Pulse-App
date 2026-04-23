@@ -190,17 +190,24 @@ export const usePulseStore = () => {
   const addComment = useCallback(async (postId: string, text: string) => {
     if (!auth.currentUser) return;
     try {
+        const { increment, updateDoc } = await import('firebase/firestore');
         await addDoc(collection(db, "comments"), {
             postId,
             userId: auth.currentUser.uid,
-            user: auth.currentUser.displayName || 'User',
+            user: userProfile.displayName || userProfile.username || 'User',
+            userAvatar: userProfile.photoURL || '',
             text,
             timestamp: serverTimestamp()
+        });
+        
+        // Increment count on post
+        await updateDoc(doc(db, "posts", postId), {
+            commentsCount: increment(1)
         });
     } catch (error) {
         console.error("Error adding comment:", error);
     }
-  }, []);
+  }, [userProfile]);
 
   const likePost = useCallback(async (postId: string) => {
     if (!auth.currentUser) return;

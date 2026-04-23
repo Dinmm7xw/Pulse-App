@@ -5,6 +5,7 @@ import type { Post } from '../../types';
 import { auth } from '../../lib/firebase';
 import { ThreadPost } from './ThreadPost';
 import { ShareSheet } from '../../components/ShareSheet';
+import { CommentsSheet } from '../../components/CommentsSheet';
 import './PulseFeed.css';
 
 interface PulseFeedProps {
@@ -20,6 +21,7 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile }) =>
     const { likePost, followingIds } = usePulseStore();
     const [feedType, setFeedType] = useState<FeedType>('recommend');
     const [sharePostId, setSharePostId] = useState<string | null>(null);
+    const [commentPostId, setCommentPostId] = useState<string | null>(null);
     const [activePostId, setActivePostId] = useState<string | null>(null);
     const [isMuted, setIsMuted] = useState(false);
     
@@ -176,7 +178,7 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile }) =>
                                             </div>
                                             <span>{post.likesCount || 0}</span>
                                         </div>
-                                        <div className="action-item" onClick={() => alert('Комментарии скоро будут доступны!')}>
+                                        <div className="action-item" onClick={() => setCommentPostId(post.id)}>
                                             <div className="icon-circle glass">
                                                 <MessageCircle size={28} />
                                             </div>
@@ -205,6 +207,12 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile }) =>
                 isOpen={!!sharePostId} 
                 onClose={() => setSharePostId(null)} 
                 postId={sharePostId || ''} 
+            />
+
+            <CommentsSheet
+                isOpen={!!commentPostId}
+                onClose={() => setCommentPostId(null)}
+                postId={commentPostId || ''}
             />
         </div>
     );
