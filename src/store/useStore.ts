@@ -435,7 +435,8 @@ export const usePulseStore = () => {
     followUser,
     unfollowUser,
     fetchUserProfile,
-    fetchUserPosts,    userProfile,
+    fetchUserPosts,
+    userProfile,
     updateUserProfile,
     deletePost,
     repostPost: async (postId: string) => {
