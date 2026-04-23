@@ -24,7 +24,12 @@ export async function searchTracks(query: string, limit = 20): Promise<ItunesTra
         limit: limit.toString(),
         entity: 'song',
     });
-    const res = await fetch(`${ITUNES_BASE}/search?${params}`);
+    
+    // Use a CORS proxy to avoid issues on deployed environments like Vercel
+    const targetUrl = `${ITUNES_BASE}/search?${params}`;
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+    
+    const res = await fetch(proxyUrl);
     const data: ItunesSearchResult = await res.json();
     return data.results.filter(t => t.previewUrl);
 }
