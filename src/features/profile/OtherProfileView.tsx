@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronLeft, Grid, Shield, Heart, MessageCircle, X, UserPlus, UserCheck, MessageSquare } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
 import { auth } from '../../lib/firebase';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionsSheet } from '../../components/ConnectionsSheet';
 import type { Post, UserProfile } from '../../types';
 import './OtherProfileView.css';
@@ -46,8 +47,6 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
         if (profile) {
             const chat = await createDirectChat(profile.id, profile.displayName || profile.username, profile.photoURL || '');
             if (chat) {
-                // We'd ideally navigate to chats tab and select this chat.
-                // For now, let's just close this view or alert.
                 alert("Чат создан! Перейдите в раздел сообщений.");
             }
         }
@@ -88,7 +87,7 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
                         
                         <div className="insta-stats">
                             <div className="stat-box">
-                                <span className="count">{posts.length}</span>
+                                <span className="count">{(posts || []).length}</span>
                                 <span className="label">Посты</span>
                             </div>
                             <div className="stat-box" onClick={() => setConnectionsModal({isOpen: true, type: 'followers'})}>
@@ -108,24 +107,21 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
                     </div>
 
                     <div className="profile-actions-row">
-                        <button 
-                            className={`insta-btn ${isFollowing ? 'secondary' : 'primary-pulse'}`}
-                            onClick={handleFollow}
-                        >
-                            {isFollowing ? 'Отписаться' : 'Подписаться'}
+                        <button className={`insta-btn ${isFollowing ? 'following' : 'primary'}`} onClick={handleFollow}>
+                            {isFollowing ? <><UserCheck size={18} /> Подписки</> : <><UserPlus size={18} /> Подписаться</>}
                         </button>
-                        <button className="insta-btn" onClick={handleMessage}>
+                        <button className="insta-btn secondary" onClick={handleMessage}>
                             <MessageSquare size={18} /> Сообщение
                         </button>
                     </div>
                 </div>
 
                 <div className="insta-tabs">
-                    <div 
-                        className={`insta-tab ${activeTab === 'grid' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('grid')}
-                    >
-                        <Grid size={22} />
+                    <div className={`insta-tab ${activeTab === 'grid' ? 'active' : ''}`} onClick={() => setActiveTab('grid')}>
+                        <Grid size={20} />
+                    </div>
+                    <div className={`insta-tab ${activeTab === 'anonymous' ? 'active' : ''}`} onClick={() => setActiveTab('anonymous')}>
+                        <Shield size={20} />
                     </div>
                 </div>
 
@@ -137,13 +133,12 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
                             <div 
                                 key={post.id} 
                                 className="grid-item" 
-                                style={{ background: post.color }}
                                 onClick={() => setSelectedPost(post)}
                             >
                                 {post.mediaUrl ? (
-                                    <img src={post.mediaUrl} alt="" />
+                                    <img src={post.mediaUrl} alt="" loading="lazy" />
                                 ) : (
-                                    <div className="text-post-preview">
+                                    <div className="grid-text-preview" style={{ background: post.color }}>
                                         <p>{post.desc}</p>
                                     </div>
                                 )}
@@ -156,24 +151,30 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
             <AnimatePresence>
                 {selectedPost && (
                     <motion.div 
-                        className="post-detail-overlay-other"
+                        className="post-detail-overlay glass"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
                     >
-                        <div className="post-detail-modal glass">
-                            <header className="post-modal-header">
-                                <button className="close-post-btn" onClick={() => setSelectedPost(null)}><X size={24} /></button>
-                                <h3>Публикация</h3>
-                            </header>
-                            <div className="post-detail-content">
-                                {selectedPost.mediaUrl ? (
-                                    <img src={selectedPost.mediaUrl} alt="" />
-                                ) : (
-                                    <div className="post-typography-card" style={{ background: selectedPost.color }}>
-                                        <p>{selectedPost.desc}</p>
-                                    </div>
-                                )}
+                        <div className="detail-header">
+                            <button className="icon-btn" onClick={() => setSelectedPost(null)}><X size={24} /></button>
+                            <h3>Публикация</h3>
+                            <div style={{ width: 40 }} />
+                        </div>
+                        <div className="detail-content">
+                            {selectedPost.mediaUrl ? (
+                                <img src={selectedPost.mediaUrl} alt="" className="detail-img" />
+                            ) : (
+                                <div className="detail-text" style={{ background: selectedPost.color }}>
+                                    <p>{selectedPost.desc}</p>
+                                </div>
+                            )}
+                            <div className="detail-actions">
+                                <div className="action-btn"><Heart size={24} /> <span>{selectedPost.likesCount || 0}</span></div>
+                                <div className="action-btn"><MessageCircle size={24} /> <span>{selectedPost.commentsCount || 0}</span></div>
+                            </div>
+                            <div className="detail-info">
+                                <p><strong>{profile.username}</strong> {selectedPost.desc}</p>
                             </div>
                         </div>
                     </motion.div>

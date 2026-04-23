@@ -66,9 +66,12 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile }) =>
         }
 
         const activePost = filteredPosts.find(p => p.id === activePostId);
+        const targetUrl = activePost?.musicUrl || activePost?.audioUrl;
         
-        if (activePost?.audioUrl && !isMuted) {
-            audioRef.current.src = activePost.audioUrl;
+        if (targetUrl && !isMuted) {
+            if (audioRef.current.src !== targetUrl) {
+                audioRef.current.src = targetUrl;
+            }
             audioRef.current.play().catch(e => console.log("Audio play blocked by browser", e));
         } else {
             audioRef.current.pause();
@@ -196,6 +199,15 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile }) =>
                                                 <MoreVertical size={28} />
                                             </div>
                                         </div>
+                                        
+                                        {/* Spinning Record Disc */}
+                                        {(post.musicUrl || post.audioUrl) && (
+                                            <div className={`music-disc-wrap ${activePostId === post.id && !isMuted ? 'spinning' : ''}`}>
+                                                <div className="music-disc">
+                                                    <img src={post.userAvatar || NEUTRAL_AVATAR} alt="" />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

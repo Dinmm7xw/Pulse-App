@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Zap, RefreshCw, Shield, Loader, Camera, Music, Hash, Lock, Users } from 'lucide-react';
+import { X, Zap, RefreshCw, Shield, Loader, Camera, Music, Hash, Lock, Users, Eye } from 'lucide-react';
 import { auth } from '../../lib/firebase';
 import { uploadMedia } from '../../lib/upload';
 import { MusicPicker } from '../../components/MusicPicker/MusicPicker';
@@ -373,7 +373,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                                         </div>
 
                                         <div className="editor-sidebar">
-                                            <button className="editor-tool-btn" onClick={() => setShowMusicSelector(true)}>
+                                            <button className="editor-tool-btn" onClick={() => setShowMusicPicker(true)}>
                                                 <div className="tool-icon-wrap"><Music size={22} /></div>
                                                 <span>Музыка</span>
                                             </button>
