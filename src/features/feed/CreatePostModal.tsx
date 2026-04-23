@@ -39,7 +39,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
     const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
     
     // TikTok-style settings
-    const [hashtags, setHashtags] = useState<string[]>([]);
+
     const [privacy, setPrivacy] = useState<'public' | 'friends' | 'private'>('public');
     const [selectedTrack, setSelectedTrack] = useState<ItunesTrack | null>(null);
     const [showMusicPicker, setShowMusicPicker] = useState(false);
@@ -148,7 +148,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
         } else {
             setMediaType('image'); setCapturedImage(url);
         }
-        setMode('preview');
+        setStep('EDIT');
     };
 
     const handleCaptureAction = () => {
