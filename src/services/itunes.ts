@@ -27,31 +27,36 @@ export async function searchTracks(query: string, limit = 20): Promise<ItunesTra
     
     const targetUrl = `${ITUNES_BASE}/search?${params}`;
     
-    try {
-        // Using allorigins 'get' endpoint which is often more reliable
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-        const res = await fetch(proxyUrl);
-        const json = await res.json();
-        
-        if (json && json.contents) {
-            const data: ItunesSearchResult = JSON.parse(json.contents);
-            return data.results.filter(t => t.previewUrl);
-        }
-        
-        // Fallback to raw if get fails or returns unexpected format
-        const rawRes = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`);
-        const rawData: ItunesSearchResult = await rawRes.json();
-        return rawData.results.filter(t => t.previewUrl);
-    } catch (error) {
-        console.error("iTunes search failed:", error);
-        // Last resort: direct fetch (might fail due to CORS in browser)
+    // List of proxies to try in order
+    const proxies = [
+        (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    ];
+
+    for (const proxyFn of proxies) {
         try {
-            const res = await fetch(targetUrl);
+            const proxyUrl = proxyFn(targetUrl);
+            const res = await fetch(proxyUrl);
+            if (!res.ok) throw new Error(`Proxy failed with status ${res.status}`);
+            
             const data: ItunesSearchResult = await res.json();
-            return data.results.filter(t => t.previewUrl);
-        } catch (e) {
-            return [];
+            if (data && data.results) {
+                return data.results.filter(t => t.previewUrl);
+            }
+        } catch (error) {
+            console.warn(`Proxy ${proxyFn.name || 'alternative'} failed, trying next...`, error);
+            continue;
         }
+    }
+
+    // Last resort: direct fetch (likely to fail in browser, but good for local dev)
+    try {
+        const res = await fetch(targetUrl);
+        const data: ItunesSearchResult = await res.json();
+        return data.results.filter(t => t.previewUrl);
+    } catch (e) {
+        console.error("All search attempts failed");
+        return [];
     }
 }
 
