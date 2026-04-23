@@ -200,7 +200,8 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile }) =>
                                 </div>
                             </div>
                         )
-                    ))
+                    ))}
+                    </div>
                 )}
             </div>
 
