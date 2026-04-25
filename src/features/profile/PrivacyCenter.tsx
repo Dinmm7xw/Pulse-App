@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { ChevronLeft, Shield, Lock, Eye, FileText, HelpCircle, ChevronDown, ChevronUp, Bell, Copyright } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TERMS_OF_SERVICE, PRIVACY_POLICY, COPYRIGHT_INFO } from './LegalContent';
 import './PrivacyCenter.css';
 
-// Using the generated image path
+// Image paths
 const HERO_IMAGE = '/privacy_center_hero_1776949913527.png';
+const COPYRIGHT_IMAGE = '/copyright_protection_hero_1777102908683.png';
 
 interface PrivacyCenterProps {
     onClose: () => void;
@@ -28,13 +30,13 @@ export const PrivacyCenter: React.FC<PrivacyCenterProps> = ({ onClose }) => {
                 <button className="back-btn" onClick={onClose}>
                     <ChevronLeft size={24} />
                 </button>
-                <h2>Центр конфиденциальности</h2>
+                <h2>Юридический центр</h2>
             </header>
 
             <div className="privacy-hero">
-                <img src={HERO_IMAGE} alt="Privacy" className="hero-img" />
-                <h1>Мы заботимся о вашей безопасности</h1>
-                <p>Узнайте, как мы защищаем ваши данные и какие инструменты контроля доступны вам в приложении Pulse.</p>
+                <img src={openAccordion === 'copyright-full' ? COPYRIGHT_IMAGE : HERO_IMAGE} alt="Privacy" className="hero-img" />
+                <h1>Безопасность и Право</h1>
+                <p>Здесь вы найдете официальные документы, подтверждающие авторство и правила использования платформы Pulse.</p>
             </div>
 
             <div className="privacy-content">
@@ -42,81 +44,78 @@ export const PrivacyCenter: React.FC<PrivacyCenterProps> = ({ onClose }) => {
                     <div className="privacy-card" onClick={() => toggleAccordion('data')}>
                         <div className="card-icon-wrap"><Eye size={24} /></div>
                         <h3>Прозрачность данных</h3>
-                        <p>Мы используем ваши координаты только для отображения на карте. Мы не передаем их третьим лицам.</p>
+                        <p>Как мы работаем с вашей геолокацией и личной информацией.</p>
                     </div>
-                    <div className="privacy-card" onClick={() => toggleAccordion('security')}>
-                        <div className="card-icon-wrap"><Lock size={24} /></div>
-                        <h3>Защита аккаунта</h3>
-                        <p>Ваши сообщения и профиль защищены шифрованием Firebase. Вы полностью контролируете доступ.</p>
-                    </div>
-                    <div className="privacy-card" onClick={() => toggleAccordion('copyright')}>
+                    <div className="privacy-card" onClick={() => toggleAccordion('copyright-full')}>
                         <div className="card-icon-wrap"><Copyright size={24} /></div>
                         <h3>Авторские права</h3>
-                        <p>Все права на музыку предоставлены iTunes API для ознакомления. Ваш контент принадлежит вам.</p>
+                        <p>Информация о владельце проекта и интеллектуальной собственности.</p>
+                    </div>
+                    <div className="privacy-card" onClick={() => toggleAccordion('terms-full')}>
+                        <div className="card-icon-wrap"><FileText size={24} /></div>
+                        <h3>Условия сервиса</h3>
+                        <p>Полный текст пользовательского соглашения Pulse.</p>
                     </div>
                 </div>
 
                 <div className="detailed-section">
-                    <h2>Частые вопросы</h2>
+                    <h2>Документация</h2>
                     
                     <div className="accordion-item">
-                        <div className="accordion-header" onClick={() => toggleAccordion('loc')}>
-                            <span>Как работает геолокация?</span>
-                            {openAccordion === 'loc' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                        <div className="accordion-header" onClick={() => toggleAccordion('terms-full')}>
+                            <span>Условия использования (Terms of Service)</span>
+                            {openAccordion === 'terms-full' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                         </div>
                         <AnimatePresence>
-                            {openAccordion === 'loc' && (
+                            {openAccordion === 'terms-full' && (
                                 <motion.div 
                                     className="accordion-content"
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: 'auto', opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
+                                    style={{ whiteSpace: 'pre-wrap' }}
                                 >
-                                    Pulse использует GPS вашего устройства только тогда, когда приложение открыто. 
-                                    Ваше местоположение обновляется только при публикации «Пульса» или «Шаута». 
-                                    Вы можете в любой момент скрыть себя с карты в настройках профиля.
+                                    {TERMS_OF_SERVICE}
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
 
                     <div className="accordion-item">
-                        <div className="accordion-header" onClick={() => toggleAccordion('anon')}>
-                            <span>Безопасны ли анонимные посты?</span>
-                            {openAccordion === 'anon' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                        <div className="accordion-header" onClick={() => toggleAccordion('data')}>
+                            <span>Политика конфиденциальности</span>
+                            {openAccordion === 'data' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                         </div>
                         <AnimatePresence>
-                            {openAccordion === 'anon' && (
+                            {openAccordion === 'data' && (
                                 <motion.div 
                                     className="accordion-content"
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: 'auto', opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
+                                    style={{ whiteSpace: 'pre-wrap' }}
                                 >
-                                    Да. При публикации анонимного поста ваше имя и аватар скрываются от всех пользователей. 
-                                    Даже модераторы видят только анонимный идентификатор, если пост не нарушает правила сообщества.
+                                    {PRIVACY_POLICY}
                                 </motion.div>
                             )}
                         </AnimatePresence>
                     </div>
 
                     <div className="accordion-item">
-                        <div className="accordion-header" onClick={() => toggleAccordion('copy-details')}>
-                            <span>Политика авторских прав на музыку</span>
-                            {openAccordion === 'copy-details' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                        <div className="accordion-header" onClick={() => toggleAccordion('copyright-full')}>
+                            <span>Информация об авторских правах</span>
+                            {openAccordion === 'copyright-full' ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                         </div>
                         <AnimatePresence>
-                            {openAccordion === 'copy-details' && (
+                            {openAccordion === 'copyright-full' && (
                                 <motion.div 
                                     className="accordion-content"
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: 'auto', opacity: 1 }}
                                     exit={{ height: 0, opacity: 0 }}
+                                    style={{ whiteSpace: 'pre-wrap', fontWeight: 'bold' }}
                                 >
-                                    Вся музыка в приложении Pulse транслируется через iTunes Search API. 
-                                    Мы предоставляем только ознакомительные фрагменты (30 секунд). 
-                                    Если вы являетесь правообладателем и хотите удалить свой трек, пожалуйста, 
-                                    свяжитесь с поддержкой Pulse.
+                                    {COPYRIGHT_INFO}
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -125,8 +124,8 @@ export const PrivacyCenter: React.FC<PrivacyCenterProps> = ({ onClose }) => {
             </div>
 
             <footer className="footer-privacy">
-                <p>© 2024 Pulse App. Часть экосистемы Динмухаммеда.</p>
-                <p>Версия 2.4.0 (Stable)</p>
+                <p>© 2024 Pulse App. Автор и владелец: Dinmuhammed.</p>
+                <p>Все права защищены законом об авторском праве РК.</p>
             </footer>
         </motion.div>
     );
