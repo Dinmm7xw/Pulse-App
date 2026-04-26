@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, User, UserPlus, UserCheck, Loader2 } from 'lucide-react';
+import { Search, User, UserPlus, UserCheck, Loader2, Bell, MapPin, Heart, MessageCircle, MoreHorizontal } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
-import { auth } from '../../lib/firebase';
-import { PulseFeed } from '../feed/PulseFeed';
 import { motion, AnimatePresence } from 'framer-motion';
 import './ExploreView.css';
 
@@ -11,11 +9,11 @@ interface ExploreViewProps {
 }
 
 export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
-    const { searchUsers, followUser, unfollowUser, followingIds, posts } = usePulseStore();
+    const { searchUsers, followUser, unfollowUser, followingIds, posts, likePost } = usePulseStore();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
-    const [activePostId, setActivePostId] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'following' | 'near' | 'interests'>('near');
 
     useEffect(() => {
         if (!searchQuery.trim()) {
@@ -42,17 +40,42 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
         }
     };
 
+    const handleLike = async (postId: string) => {
+        await likePost(postId);
+    };
+
     // Filter posts for recommendation (non-anon)
     const recommendedPosts = posts.filter(p => !p.isAnonymous);
+    
+    // Fake trending stories from posts with media
+    const trendingStories = recommendedPosts.filter(p => p.mediaUrl).slice(0, 6);
+
+    const formatTime = (ts: number) => {
+        const diff = Date.now() - ts;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        if (hours < 1) return 'Только что';
+        if (hours < 24) return `${hours} ч. назад`;
+        return `${Math.floor(hours/24)} д. назад`;
+    };
 
     return (
         <div className="explore-view">
-            <header className="explore-header glass">
+            <header className="explore-header">
+                <div className="header-top-row">
+                    <div className="header-title">Pulse</div>
+                    <div className="header-actions">
+                        <button className="action-btn">
+                            <Bell size={24} />
+                            <div className="notification-dot"></div>
+                        </button>
+                    </div>
+                </div>
+                
                 <div className="search-input-wrapper">
                     <Search size={18} className="search-icon" />
                     <input 
                         type="text" 
-                        placeholder="Поиск людей в Pulse..." 
+                        placeholder="Ищете что-то?..." 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -77,7 +100,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
                                 (searchResults || []).map(user => (
                                     <div 
                                         key={user.id} 
-                                        className="user-search-card glass"
+                                        className="user-search-card"
                                         onClick={() => onViewProfile(user.id)}
                                     >
                                         <div className="user-info-main">
@@ -103,33 +126,121 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
                         </motion.div>
                     ) : (
                         <motion.div 
-                            key="discovery-grid"
-                            className="discovery-grid-container"
+                            key="main-feed"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                         >
-                            <div className="explore-section-title">В тренде</div>
-                            <div className="discovery-grid">
-                                {recommendedPosts.map((post) => (
-                                    <div 
-                                        key={post.id} 
-                                        className="discovery-item"
-                                        onClick={() => setActivePostId(post.id)}
-                                    >
-                                        {post.mediaUrl ? (
-                                            post.mediaUrl.includes('/video/upload/') ? (
-                                                <video src={post.mediaUrl} muted playsInline />
+                            {/* Trending Stories */}
+                            <div className="trending-section">
+                                <div className="section-header">
+                                    <h3>✨ В тренде</h3>
+                                    <span className="see-all">Все</span>
+                                </div>
+                                <div className="trending-scroll">
+                                    {trendingStories.map(story => (
+                                        <div className="story-card" key={`story-${story.id}`}>
+                                            {story.mediaUrl?.includes('/video/upload/') ? (
+                                                <video src={story.mediaUrl} className="story-media" muted playsInline />
                                             ) : (
-                                                <img src={post.mediaUrl} alt="" />
-                                            )
-                                        ) : (
-                                            <div className="discovery-text-preview" style={{ background: post.color }}>
-                                                <p>{post.desc}</p>
+                                                <img src={story.mediaUrl} className="story-media" alt="" />
+                                            )}
+                                            <div className="story-overlay">
+                                                <img src={story.userAvatar || '/default-avatar.png'} className="story-avatar" alt="" />
+                                                <span className="story-username">{story.userName}</span>
                                             </div>
-                                        )}
-                                        <div className="discovery-overlay">
-                                            <span>❤️ {post.likesCount || 0}</span>
+                                        </div>
+                                    ))}
+                                    {trendingStories.length === 0 && (
+                                        <div className="no-results" style={{padding: '20px'}}>Пока нет историй</div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Feed Tabs */}
+                            <div className="feed-tabs">
+                                <button 
+                                    className={`feed-tab ${activeTab === 'following' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('following')}
+                                >
+                                    Подписки
+                                </button>
+                                <button 
+                                    className={`feed-tab ${activeTab === 'near' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('near')}
+                                >
+                                    Рядом
+                                </button>
+                                <button 
+                                    className={`feed-tab ${activeTab === 'interests' ? 'active' : ''}`}
+                                    onClick={() => setActiveTab('interests')}
+                                >
+                                    Интересное
+                                </button>
+                            </div>
+
+                            {/* Classic Feed Cards */}
+                            <div className="classic-feed-container">
+                                {recommendedPosts.map(post => (
+                                    <div className="post-card" key={`feed-${post.id}`}>
+                                        <div className="post-card-header">
+                                            <div className="post-user-info" onClick={() => onViewProfile(post.userId)}>
+                                                <img src={post.userAvatar || '/default-avatar.png'} className="post-avatar" alt="" />
+                                                <div className="post-user-details">
+                                                    <span className="post-display-name">
+                                                        {post.userName}
+                                                        {post.likesCount > 100 && <span style={{color:'var(--primary-color)'}}>✓</span>}
+                                                    </span>
+                                                    <span className="post-meta">{post.locationCity || 'Город'} • {formatTime(post.timestamp)}</span>
+                                                </div>
+                                            </div>
+                                            <button className="action-btn">
+                                                <MoreHorizontal size={20} />
+                                            </button>
+                                        </div>
+
+                                        <div className="post-media-container">
+                                            {post.mediaUrl ? (
+                                                post.mediaUrl.includes('/video/upload/') ? (
+                                                    <video src={post.mediaUrl} className="post-media" controls playsInline />
+                                                ) : (
+                                                    <img src={post.mediaUrl} className="post-media" alt="" />
+                                                )
+                                            ) : (
+                                                <div className="post-text-content" style={{ background: post.color || '#222' }}>
+                                                    <p>{post.desc}</p>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="post-card-footer">
+                                            {post.mediaUrl && (
+                                                <div className="post-description">
+                                                    <strong>{post.userName}</strong> {post.desc}
+                                                </div>
+                                            )}
+                                            
+                                            <div className="post-tags">
+                                                <span className="post-tag">#{post.locationCity || 'Pulse'}</span>
+                                                {post.likesCount > 50 && <span className="post-tag">#Популярное</span>}
+                                            </div>
+
+                                            <div className="post-actions-row">
+                                                <div style={{display: 'flex', gap: '15px'}}>
+                                                    <button className="post-action-btn" onClick={() => handleLike(post.id)}>
+                                                        <Heart size={20} />
+                                                        <span>{post.likesCount || 0}</span>
+                                                    </button>
+                                                    <button className="post-action-btn">
+                                                        <MessageCircle size={20} />
+                                                        <span>0</span>
+                                                    </button>
+                                                </div>
+                                                <button className="post-view-map-btn">
+                                                    <MapPin size={14} style={{marginRight: '4px'}} />
+                                                    На карте
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -137,27 +248,8 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
                         </motion.div>
                     )}
                 </AnimatePresence>
-
-                {/* Immersive Feed Overlay */}
-                <AnimatePresence>
-                    {activePostId && (
-                        <motion.div 
-                            className="immersive-feed-overlay"
-                            initial={{ y: '100%' }}
-                            animate={{ y: 0 }}
-                            exit={{ y: '100%' }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        >
-                            <PulseFeed 
-                                posts={recommendedPosts} 
-                                onViewProfile={onViewProfile} 
-                                onClose={() => setActivePostId(null)}
-                                initialPostId={activePostId}
-                            />
-                        </motion.div>
-                    )}
-                </AnimatePresence>
             </div>
         </div>
     );
 };
+
