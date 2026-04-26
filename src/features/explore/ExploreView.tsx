@@ -3,6 +3,8 @@ import { Search, User, UserPlus, UserCheck, Loader2, Bell, MapPin, Heart, Messag
 import { usePulseStore } from '../../store/useStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PostCommentsModal } from '../feed/PostCommentsModal';
+import { StoryViewer } from './StoryViewer';
+import { NotificationsModal } from './NotificationsModal';
 import './ExploreView.css';
 
 interface ExploreViewProps {
@@ -17,6 +19,8 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
     const [isSearching, setIsSearching] = useState(false);
     const [activeTab, setActiveTab] = useState<'following' | 'near' | 'interests'>('near');
     const [commentPostId, setCommentPostId] = useState<string | null>(null);
+    const [activeStoryIndex, setActiveStoryIndex] = useState<number | null>(null);
+    const [isNotifOpen, setIsNotifOpen] = useState(false);
 
     useEffect(() => {
         if (!searchQuery.trim()) {
@@ -79,7 +83,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                 <div className="header-top-row">
                     <div className="header-title">Pulse</div>
                     <div className="header-actions">
-                        <button className="action-btn">
+                        <button className="action-btn" onClick={() => setIsNotifOpen(true)}>
                             <Bell size={24} />
                             <div className="notification-dot"></div>
                         </button>
@@ -153,8 +157,8 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                                     <span className="see-all">Все</span>
                                 </div>
                                 <div className="trending-scroll">
-                                    {trendingStories.map(story => (
-                                        <div className="story-card" key={`story-${story.id}`}>
+                                    {trendingStories.map((story, idx) => (
+                                        <div className="story-card" key={`story-${story.id}`} onClick={() => setActiveStoryIndex(idx)}>
                                             {story.mediaUrl?.includes('/video/upload/') ? (
                                                 <video src={story.mediaUrl} className="story-media" muted playsInline />
                                             ) : (
@@ -270,6 +274,19 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                 <PostCommentsModal 
                     postId={commentPostId} 
                     onClose={() => setCommentPostId(null)} 
+                />
+
+                {activeStoryIndex !== null && (
+                    <StoryViewer 
+                        stories={trendingStories} 
+                        initialIndex={activeStoryIndex} 
+                        onClose={() => setActiveStoryIndex(null)} 
+                    />
+                )}
+
+                <NotificationsModal 
+                    isOpen={isNotifOpen} 
+                    onClose={() => setIsNotifOpen(false)} 
                 />
             </div>
         </div>
