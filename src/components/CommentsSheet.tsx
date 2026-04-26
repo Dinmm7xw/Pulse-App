@@ -72,11 +72,19 @@ export const CommentsSheet: React.FC<CommentsSheetProps> = ({ isOpen, onClose, p
                             ) : (
                                 comments.map((comment) => (
                                     <div key={comment.id} className="comment-item">
-                                        <div className="comment-avatar">
+                                        <div 
+                                            className="comment-avatar" 
+                                            onClick={() => { setViewingUserId(comment.userId); onClose(); }}
+                                            style={{ cursor: 'pointer' }}
+                                        >
                                             {comment.userAvatar ? <img src={comment.userAvatar} alt="" /> : <div className="avatar-placeholder"><User size={16} /></div>}
                                         </div>
                                         <div className="comment-content">
-                                            <div className="comment-user">@{comment.user}</div>
+                                            <div 
+                                                className="comment-user"
+                                                onClick={() => { setViewingUserId(comment.userId); onClose(); }}
+                                                style={{ cursor: 'pointer' }}
+                                            >@{comment.user}</div>
                                             <div className="comment-text">{comment.text}</div>
                                         </div>
                                     </div>

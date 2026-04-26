@@ -20,7 +20,7 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
     const [profile, setProfile] = useState<(UserProfile & { id: string }) | null>(null);
     const [posts, setPosts] = useState<Post[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'grid' | 'anonymous'>('grid');
+    const [profileTab, setProfileTab] = useState<'grid' | 'anonymous'>('grid');
     const [selectedPost, setSelectedPost] = useState<Post | null>(null);
     const [connectionsModal, setConnectionsModal] = useState<{isOpen: boolean, type: 'followers' | 'following'}>({isOpen: false, type: 'followers'});
     const [commentPostId, setCommentPostId] = useState<string | null>(null);
@@ -166,10 +166,10 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
                 </div>
 
                 <div className="insta-tabs">
-                    <div className={`insta-tab ${activeTab === 'grid' ? 'active' : ''}`} onClick={() => setActiveTab('grid')}>
+                    <div className={`insta-tab ${profileTab === 'grid' ? 'active' : ''}`} onClick={() => setProfileTab('grid')}>
                         <Grid size={20} />
                     </div>
-                    <div className={`insta-tab ${activeTab === 'anonymous' ? 'active' : ''}`} onClick={() => setActiveTab('anonymous')}>
+                    <div className={`insta-tab ${profileTab === 'anonymous' ? 'active' : ''}`} onClick={() => setProfileTab('anonymous')}>
                         <Shield size={20} />
                     </div>
                 </div>
