@@ -119,18 +119,6 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
     }
   };
 
-  const handleSavePrivacy = async () => {
-    setIsSaving(true);
-    try {
-      await updateUserProfile({ hideLocation });
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (error: any) {
-      setErrorMsg(error.message);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

@@ -147,7 +147,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
                                             )}
                                             <div className="story-overlay">
                                                 <img src={story.userAvatar || '/default-avatar.png'} className="story-avatar" alt="" />
-                                                <span className="story-username">{story.userName}</span>
+                                                <span className="story-username">{story.user}</span>
                                             </div>
                                         </div>
                                     ))}
@@ -188,10 +188,10 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
                                                 <img src={post.userAvatar || '/default-avatar.png'} className="post-avatar" alt="" />
                                                 <div className="post-user-details">
                                                     <span className="post-display-name">
-                                                        {post.userName}
+                                                        {post.user}
                                                         {post.likesCount > 100 && <span style={{color:'var(--primary-color)'}}>✓</span>}
                                                     </span>
-                                                    <span className="post-meta">{post.locationCity || 'Город'} • {formatTime(post.timestamp)}</span>
+                                                    <span className="post-meta">{post.location || post.city || 'Город'} • {formatTime(post.timestamp)}</span>
                                                 </div>
                                             </div>
                                             <button className="action-btn">
@@ -216,12 +216,12 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
                                         <div className="post-card-footer">
                                             {post.mediaUrl && (
                                                 <div className="post-description">
-                                                    <strong>{post.userName}</strong> {post.desc}
+                                                    <strong>{post.user}</strong> {post.desc}
                                                 </div>
                                             )}
                                             
                                             <div className="post-tags">
-                                                <span className="post-tag">#{post.locationCity || 'Pulse'}</span>
+                                                <span className="post-tag">#{post.location || post.city || 'Pulse'}</span>
                                                 {post.likesCount > 50 && <span className="post-tag">#Популярное</span>}
                                             </div>
 

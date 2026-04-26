@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { auth } from './lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { AppLayout } from './components/AppLayout';
 import { MapView } from './features/map/MapView';
-import { PulseFeed } from './features/feed/PulseFeed';
 import { ChatView } from './features/chat/ChatView';
 import { ProfileView } from './features/profile/ProfileView';
 import { CreatePostModal } from './features/feed/CreatePostModal';
@@ -15,20 +14,19 @@ import { SettingsView } from './features/profile/SettingsView';
 import { ExploreView } from './features/explore/ExploreView';
 import { OtherProfileView } from './features/profile/OtherProfileView';
 import { PrivacyCenter } from './features/profile/PrivacyCenter';
-import { NotFoundView } from './components/NotFoundView';
 import { getCityName } from './lib/geo';
 import { Loader2 } from 'lucide-react';
 
 function App() {
   const [user, setUser] = useState<any>(null);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
-   const [activeTab, setActiveTab] = useState('map');
+  const [activeTab, setActiveTab] = useState('map');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [isPrivacyCenterOpen, setIsPrivacyCenterOpen] = useState(false);
-  const [refreshProfile, setRefreshProfile] = useState(0);
-  const { posts, addPost, userLocation, userProfile, updateLocation } = usePulseStore();
+  const [refreshProfileKey, setRefreshProfileKey] = useState(0);
+  const { addPost, userLocation, userProfile, updateLocation } = usePulseStore();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -55,7 +53,7 @@ function App() {
 
   // Onboarding logic: check if profile is complete
   if (user && !isProfileSetupFinished) {
-      return <CompleteProfileView onComplete={() => setRefreshProfile(prev => prev + 1)} initialEmail={user.email} />;
+      return <CompleteProfileView onComplete={() => setRefreshProfileKey(prev => prev + 1)} initialEmail={user.email} />;
   }
 
   const handlePublish = async (postData: {
