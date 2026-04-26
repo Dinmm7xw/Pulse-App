@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
-import { Comment } from '../../types';
+import type { Comment } from '../../types';
 import './PostCommentsModal.css';
 
 interface PostCommentsModalProps {

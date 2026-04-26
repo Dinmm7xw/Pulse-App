@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Heart, Send } from 'lucide-react';
 import './StoryViewer.css';
-import { Post } from '../../types';
+import type { Post } from '../../types';
 
 interface StoryViewerProps {
     stories: Post[];
