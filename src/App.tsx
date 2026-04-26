@@ -64,6 +64,7 @@ function App() {
     privacy?: string;
     audioUrl?: string;
     audioName?: string;
+    muteVideoAudio?: boolean;
   }) => {
     let city = 'Алматы';
     if (userLocation) {
@@ -86,7 +87,8 @@ function App() {
       hashtags: postData.hashtags,
       privacy: postData.privacy as any,
       audioUrl: postData.audioUrl,
-      audioName: postData.audioName
+      audioName: postData.audioName,
+      muteVideoAudio: postData.muteVideoAudio
     });
 
     if (success) {

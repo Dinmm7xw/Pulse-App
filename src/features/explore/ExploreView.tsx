@@ -44,7 +44,14 @@ const AutoPlayMedia: React.FC<{ post: any }> = ({ post }) => {
         <div ref={containerRef} className="post-media-container">
             {post.mediaUrl ? (
                 isVideo ? (
-                    <video ref={videoRef} src={post.mediaUrl} className="post-media" playsInline loop muted={!!post.audioUrl} />
+                    <video 
+                        ref={videoRef} 
+                        src={post.mediaUrl} 
+                        className="post-media" 
+                        playsInline 
+                        loop 
+                        muted={post.muteVideoAudio ?? false} // Respect user preference
+                    />
                 ) : (
                     <img src={post.mediaUrl} className="post-media" alt="" />
                 )

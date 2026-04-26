@@ -21,6 +21,7 @@ interface CreatePostModalProps {
         privacy?: string;
         audioUrl?: string;
         audioName?: string;
+        muteVideoAudio?: boolean;
     }) => void;
 }
 
@@ -43,6 +44,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
     const [privacy, setPrivacy] = useState<'public' | 'friends' | 'private'>('public');
     const [selectedTrack, setSelectedTrack] = useState<ItunesTrack | null>(null);
     const [showMusicPicker, setShowMusicPicker] = useState(false);
+    const [muteOriginalAudio, setMuteOriginalAudio] = useState(false);
     
     // Camera settings
     const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
@@ -240,7 +242,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
             hashtags: parsedTags,
             privacy,
             audioUrl: selectedTrack?.previewUrl ?? undefined,
-            audioName: selectedTrack ? `${selectedTrack.trackName} — ${selectedTrack.artistName}` : undefined
+            audioName: selectedTrack ? `${selectedTrack.trackName} — ${selectedTrack.artistName}` : undefined,
+            muteVideoAudio: muteOriginalAudio
         });
         
         // Note: Future step is updating addPost to accept additional metadata
@@ -248,8 +251,8 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
         setText(''); 
         setCapturedImage(null);
         setCapturedVideo(null);
-        setMediaBlob(null); 
         setSelectedTrack(null);
+        setMuteOriginalAudio(false);
         setIsUploading(false); 
         setMode('camera'); 
         setStep('CAPTURE');
@@ -264,6 +267,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
             setCapturedVideo(null);
             setMediaBlob(null);
             setSelectedTrack(null);
+            setMuteOriginalAudio(false);
             setIsUploading(false);
             setMode('camera');
             setStep('CAPTURE');
@@ -507,6 +511,17 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                                                 </div>
                                                 <div className={`mini-toggle ${isAnonymous ? 'active' : ''}`}></div>
                                             </div>
+
+                                            {mediaType === 'video' && (
+                                                <div className="setting-item" onClick={() => setMuteOriginalAudio(!muteOriginalAudio)}>
+                                                    <div className="setting-icon">{muteOriginalAudio ? <MicOff size={18} /> : <Mic size={18} />}</div>
+                                                    <div className="setting-label">
+                                                        <span>Звук видео</span>
+                                                        <p>{muteOriginalAudio ? 'Выключен' : 'Включен'}</p>
+                                                    </div>
+                                                    <div className={`mini-toggle ${muteOriginalAudio ? 'active' : ''}`}></div>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="finalize-tip">
