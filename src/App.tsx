@@ -26,7 +26,7 @@ function App() {
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [isPrivacyCenterOpen, setIsPrivacyCenterOpen] = useState(false);
   const [, setRefreshProfileKey] = useState(0);
-  const { addPost, userLocation, userProfile, updateLocation } = usePulseStore();
+  const { addPost, userLocation, userProfile, updateLocation, profileLoaded } = usePulseStore();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -39,7 +39,7 @@ function App() {
   // Extra guard: If user has a username, they ARE complete even if flag is missing
   const isProfileSetupFinished = userProfile?.isProfileComplete || (userProfile?.username && userProfile.username.length > 2);
 
-  if (isAuthChecking) {
+  if (isAuthChecking || (user && !profileLoaded)) {
       return (
           <div style={{ height: '100vh', background: 'var(--bg-color)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
               <Loader2 className="spin" size={40} color="var(--primary-color)" />

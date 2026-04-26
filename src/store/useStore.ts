@@ -37,6 +37,7 @@ export const usePulseStore = () => {
   const [followersIds, setFollowersIds] = useState<string[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile>({ bio: '', username: '', followersCount: 0, followingCount: 0 });
   const [chats, setChats] = useState<Chat[]>([]);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   // Sync profile data from Firestore
   useEffect(() => {
@@ -46,10 +47,12 @@ export const usePulseStore = () => {
           if (docObj.exists()) {
             setUserProfile(docObj.data() as UserProfile);
           }
+          setProfileLoaded(true);
         });
         return () => unsubProfile();
       } else {
         setUserProfile({ bio: '', username: '' });
+        setProfileLoaded(false);
       }
     });
     return () => unsubAuth();
@@ -472,6 +475,7 @@ export const usePulseStore = () => {
     userProfile,
     updateUserProfile,
     deletePost,
+    profileLoaded,
     repostPost: async (postId: string) => {
         if (!auth.currentUser) return;
         const userId = auth.currentUser.uid;
