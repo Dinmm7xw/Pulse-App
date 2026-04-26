@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, User, UserPlus, UserCheck, Loader2, Bell, MapPin, Heart, MessageCircle, MoreHorizontal } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
+import { auth } from '../../lib/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PostCommentsModal } from '../feed/PostCommentsModal';
 import { StoryViewer } from './StoryViewer';
@@ -51,8 +52,21 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
         await likePost(postId);
     };
 
-    // Filter posts for recommendation (non-anon)
-    const recommendedPosts = posts.filter(p => !p.isAnonymous);
+    // Filter posts for recommendation (non-anon and privacy rules)
+    const recommendedPosts = posts.filter(p => {
+        if (p.isAnonymous) return false;
+        
+        const myId = auth.currentUser?.uid;
+        if (p.privacy === 'friends') {
+            if (p.userId === myId) return true;
+            return followingIds.includes(p.userId || '');
+        }
+        if (p.privacy === 'private') {
+            return p.userId === myId;
+        }
+        
+        return true; // public
+    });
     
     // Fake trending stories from posts with media
     const trendingStories = recommendedPosts.filter(p => p.mediaUrl).slice(0, 6);
@@ -154,7 +168,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                             <div className="trending-section">
                                 <div className="section-header">
                                     <h3>✨ В тренде</h3>
-                                    <span className="see-all">Все</span>
+                                    <span className="see-all" onClick={() => alert("Все истории временно отображаются в ленте ниже.")}>Все</span>
                                 </div>
                                 <div className="trending-scroll">
                                     {trendingStories.map((story, idx) => (
@@ -216,7 +230,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                                                     <span className="post-meta">{post.location || post.city || 'Город'} • {formatTime(post.timestamp)}</span>
                                                 </div>
                                             </div>
-                                            <button className="action-btn">
+                                            <button className="action-btn" onClick={() => alert("Опции поста:\n- Скопировать ссылку\n- Пожаловаться")}>
                                                 <MoreHorizontal size={20} />
                                             </button>
                                         </div>

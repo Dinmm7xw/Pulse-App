@@ -89,11 +89,7 @@ export const ChatView: React.FC = () => {
     };
 
     const startCall = (type: 'audio' | 'video') => {
-        if (!activeChat) return;
-        const otherUserId = activeChat.participants?.find((p: string) => p !== myId) || '';
-        const name = activeChat.participantNames?.[otherUserId] || 'Пользователь';
-        const avatar = activeChat.participantAvatars?.[otherUserId] || '';
-        setActiveCall({ type, name, avatar });
+        alert("Звонки находятся в разработке. Ожидайте в будущих обновлениях!");
     };
 
     const endCall = () => {
