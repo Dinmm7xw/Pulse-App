@@ -173,9 +173,15 @@ export const usePulseStore = () => {
       if (!user) throw new Error("No authenticated user");
       
       console.log("🔥 Store: Adding new post...", newPost);
+
+      // Firestore does not accept undefined values — strip them out
+      const cleanPost: Record<string, any> = {};
+      Object.entries({ ...newPost }).forEach(([k, v]) => {
+        if (v !== undefined) cleanPost[k] = v;
+      });
       
       const docRef = await addDoc(collection(db, "posts"), {
-        ...newPost,
+        ...cleanPost,
         userId: user.uid,
         userUsername: userProfile.username || '',
         userAvatar: userProfile.photoURL || user.photoURL || '',
@@ -191,7 +197,7 @@ export const usePulseStore = () => {
       console.error("Error adding post: ", error);
       return false;
     }
-  }, [userProfile.photoURL]);
+  }, [userProfile]);
 
   const addShout = useCallback(async (newShout: Omit<Shout, 'id' | 'timestamp' | 'userId'>) => {
     if (!auth.currentUser) return;
