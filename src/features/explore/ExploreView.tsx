@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, User, UserPlus, UserCheck, Loader2, Bell, MapPin, Heart, MessageCircle, MoreHorizontal } from 'lucide-react';
+import { Search, User, UserPlus, UserCheck, Loader2, Bell, MapPin, Heart, MessageCircle, MoreHorizontal, Share2 } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
 import { auth } from '../../lib/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -7,6 +7,7 @@ import { PostCommentsModal } from '../feed/PostCommentsModal';
 import { StoryViewer } from '../feed/StoryViewer';
 import { NotificationsModal } from './NotificationsModal';
 import { CreatorBadge } from '../../components/CreatorBadge';
+import { ShareSheet } from '../../components/ShareSheet';
 import './ExploreView.css';
 
 interface ExploreViewProps {
@@ -75,6 +76,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
     const [isSearching, setIsSearching] = useState(false);
     const [activeTab, setActiveTab] = useState<'following' | 'near' | 'interests'>('near');
     const [commentPostId, setCommentPostId] = useState<string | null>(null);
+    const [sharePostId, setSharePostId] = useState<string | null>(null);
     const [activeStoryIndex, setActiveStoryIndex] = useState<number | null>(null);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
 
@@ -332,6 +334,9 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                                                         <MessageCircle size={20} />
                                                         <span>{post.commentsCount || 0}</span>
                                                     </button>
+                                                    <button className="post-action-btn" onClick={() => setSharePostId(post.id)}>
+                                                        <Share2 size={20} />
+                                                    </button>
                                                 </div>
                                                 <button className="post-view-map-btn" onClick={() => onViewMap && onViewMap()}>
                                                     <MapPin size={14} style={{marginRight: '4px'}} />
@@ -362,6 +367,12 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                 <NotificationsModal 
                     isOpen={isNotifOpen} 
                     onClose={() => setIsNotifOpen(false)} 
+                />
+
+                <ShareSheet 
+                    isOpen={!!sharePostId} 
+                    onClose={() => setSharePostId(null)} 
+                    postId={sharePostId || ''} 
                 />
             </div>
         </div>
