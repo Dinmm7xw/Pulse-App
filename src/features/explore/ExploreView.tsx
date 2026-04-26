@@ -106,9 +106,9 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
 
     // Filter posts for recommendation (non-anon and privacy rules)
     const recommendedPosts = posts.filter(p => {
-        if (p.isAnonymous) return false;
-        
         const myId = auth.currentUser?.uid;
+        
+        // Basic privacy logic applies to both anon and non-anon
         if (p.privacy === 'friends') {
             if (p.userId === myId) return true;
             return followingIds.includes(p.userId || '');
@@ -278,13 +278,17 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                                 {displayedPosts.map(post => (
                                     <div className="post-card" key={`feed-${post.id}`}>
                                         <div className="post-card-header">
-                                            <div className="post-user-info" onClick={() => onViewProfile(post.userId || '')}>
-                                                <img src={post.userAvatar || '/default-avatar.png'} className="post-avatar" alt="" />
+                                            <div className="post-user-info" onClick={() => !post.isAnonymous && onViewProfile(post.userId || '')}>
+                                                <img 
+                                                    src={post.isAnonymous ? 'https://cdn-icons-png.flaticon.com/512/149/149071.png' : (post.userAvatar || '/default-avatar.png')} 
+                                                    className={`post-avatar ${post.isAnonymous ? 'anon-avatar' : ''}`} 
+                                                    alt="" 
+                                                />
                                                 <div className="post-user-details">
                                                     <span className="post-display-name">
-                                                        {post.user}
-                                                        <CreatorBadge username={post.userUsername} size={18} />
-                                                        {post.likesCount > 100 && !post.userUsername?.toLowerCase().startsWith('dplus01') && <span style={{color:'var(--primary-color)'}}>✓</span>}
+                                                        {post.isAnonymous ? 'Аноним' : post.user}
+                                                        {!post.isAnonymous && <CreatorBadge username={post.userUsername} size={18} />}
+                                                        {!post.isAnonymous && post.likesCount > 100 && !post.userUsername?.toLowerCase().startsWith('dplus01') && <span style={{color:'var(--primary-color)'}}>✓</span>}
                                                     </span>
                                                     <span className="post-meta">
                                                         {post.location || post.city || 'Город'} • {formatTime(post.timestamp)}
@@ -302,7 +306,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                                         <div className="post-card-footer">
                                             {post.mediaUrl && (
                                                 <div className="post-description">
-                                                    <strong>{post.user}</strong> {post.desc}
+                                                    <strong>{post.isAnonymous ? 'Аноним' : post.user}</strong> {post.desc}
                                                 </div>
                                             )}
                                             
