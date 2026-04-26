@@ -8,6 +8,7 @@ import { auth } from '../../lib/firebase';
 import { updateProfile, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from 'firebase/auth';
 import { usePulseStore } from '../../store/useStore';
 import { uploadMedia } from '../../lib/upload';
+import { CloudArchiveModal } from './CloudArchiveModal';
 import './SettingsView.css';
 
 interface SettingsViewProps {
@@ -24,9 +25,12 @@ export const NEUTRAL_AVATAR = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.or
 export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onOpenPrivacy }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab | null>(null);
   const [showCategoryList, setShowCategoryList] = useState(true);
-  const { userProfile, updateUserProfile } = usePulseStore();
+  const { userProfile, updateUserProfile, fetchUserPosts } = usePulseStore();
   const user = auth.currentUser;
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [isArchiveOpen, setIsArchiveOpen] = useState(false);
+  const [mediaCount, setMediaCount] = useState(0);
   
   const [formData, setFormData] = useState({
     displayName: user?.displayName || '',
@@ -87,8 +91,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
             setActiveTab(null);
             setShowCategoryList(true);
         }
+
+        if (user?.uid) {
+            fetchUserPosts(user.uid).then(posts => {
+                setMediaCount(posts.filter(p => !!p.mediaUrl).length);
+            });
+        }
     }
-  }, [isOpen, userProfile, user]);
+  }, [isOpen, userProfile, user, fetchUserPosts]);
 
   const handleSaveProfile = async () => {
     if (!user) return;
@@ -282,13 +292,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
                   <div className="settings-hero-card" style={{padding: '0', overflow: 'hidden', height: 'auto', flexDirection: 'column', alignItems: 'stretch'}}>
                     <div style={{padding: '20px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)'}}>
                       <div className="title" style={{fontSize: '16px'}}>Облачное хранилище Pulse</div>
-                      <div className="subtitle">У вас осталось 15 ГБ свободного места из 50 ГБ</div>
+                      <div className="subtitle">Использовано {mediaCount * 15} МБ из 5 ГБ (Файлов: {mediaCount})</div>
                     </div>
                     <div style={{padding: '16px 20px'}}>
                         <div style={{height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden'}}>
-                            <div style={{width: '30%', height: '100%', background: 'var(--primary-color)'}} />
+                            <div style={{width: `${Math.max(Math.min((mediaCount * 15) / 5000 * 100, 100), 2)}%`, height: '100%', background: 'var(--primary-color)', transition: 'width 0.5s'}} />
                         </div>
-                        <button className="insta-btn" style={{marginTop: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'white'}} onClick={handleComingSoon}>Управление хранилищем</button>
+                        <button className="insta-btn" style={{marginTop: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'white'}} onClick={() => setIsArchiveOpen(true)}>Управление хранилищем</button>
                     </div>
                   </div>
 
@@ -588,6 +598,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
           </main>
         </motion.div>
       </motion.div>
+      <CloudArchiveModal isOpen={isArchiveOpen} onClose={() => {
+        setIsArchiveOpen(false);
+        // Refresh count
+        if (user?.uid) {
+            fetchUserPosts(user.uid).then(posts => {
+                setMediaCount(posts.filter(p => !!p.mediaUrl).length);
+            });
+        }
+      }} />
     </AnimatePresence>
   );
 };
