@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, Shield, Lock, Eye, FileText, HelpCircle, ChevronDown, ChevronUp, Bell, Copyright } from 'lucide-react';
+import { ChevronLeft, Eye, FileText, ChevronDown, ChevronUp, Copyright } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TERMS_OF_SERVICE, PRIVACY_POLICY, COPYRIGHT_INFO } from './LegalContent';
 import './PrivacyCenter.css';

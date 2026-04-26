@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Zap, RefreshCw, Shield, Loader, Camera, Music, Hash, Lock, Users, Eye } from 'lucide-react';
+import { X, Zap, RefreshCw, Shield, Loader, Camera, Music, Hash, Lock, Users, Eye, Mic, MicOff } from 'lucide-react';
 import { auth } from '../../lib/firebase';
 import { uploadMedia } from '../../lib/upload';
 import { MusicPicker } from '../../components/MusicPicker/MusicPicker';

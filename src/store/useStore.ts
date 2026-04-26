@@ -23,7 +23,6 @@ import type {
     Comment, 
     Message, 
     UserLocation, 
-    FriendRequest, 
     UserProfile,
     Chat
 } from '../types';
@@ -32,7 +31,6 @@ export const usePulseStore = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [shouts, setShouts] = useState<Shout[]>([]);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [friendsLocations, setFriendsLocations] = useState<UserLocation[]>([]);
   const [followingIds, setFollowingIds] = useState<string[]>([]);
   const [followersIds, setFollowersIds] = useState<string[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile>({ bio: '', username: '', followersCount: 0, followingCount: 0 });
