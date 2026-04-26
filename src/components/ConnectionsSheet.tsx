@@ -12,28 +12,33 @@ interface ConnectionsSheetProps {
 }
 
 export const ConnectionsSheet: React.FC<ConnectionsSheetProps> = ({ isOpen, onClose, userId, type }) => {
-    const { fetchUserProfile, followingIds, followUser, unfollowUser } = usePulseStore();
+    const { fetchUserProfile, followingIds, followUser, unfollowUser, fetchFollowers, fetchFollowing, setViewingUserId } = usePulseStore();
     const [users, setUsers] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
+        const loadUsers = async () => {
+            setIsLoading(true);
+            try {
+                const results = type === 'followers' 
+                    ? await fetchFollowers(userId) 
+                    : await fetchFollowing(userId);
+                setUsers(results);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
         if (isOpen && userId) {
             loadUsers();
         }
-    }, [isOpen, userId, type]);
+    }, [isOpen, userId, type, fetchFollowers, fetchFollowing]);
 
-    const loadUsers = async () => {
-        setIsLoading(true);
-        // In a real app, we'd fetch the actual list from Firestore.
-        // For now, let's simulate or fetch a few to show the UI.
-        // We'll need a way to get the actual list of IDs first.
-        // Since we don't have a "fetchFollowers" function yet, we'll use a placeholder
-        // or implement it in the store.
-        
-        // Simulating loading for now - we'll update the store to provide this data
-        setTimeout(() => {
-            setIsLoading(false);
-        }, 800);
+    const handleUserClick = (targetUid: string) => {
+        setViewingUserId(targetUid);
+        onClose();
     };
 
     return (
@@ -63,10 +68,31 @@ export const ConnectionsSheet: React.FC<ConnectionsSheetProps> = ({ isOpen, onCl
                         <div className="connections-list">
                             {isLoading ? (
                                 <div className="loading-connections">Загрузка...</div>
-                            ) : (
+                            ) : users.length === 0 ? (
                                 <div className="empty-connections">
                                     {type === 'followers' ? 'У пользователя пока нет подписчиков' : 'Пользователь ни на кого не подписан'}
                                 </div>
+                            ) : (
+                                users.map(user => (
+                                    <div key={user.id} className="connection-item" onClick={() => handleUserClick(user.id)}>
+                                        <div className="connection-avatar">
+                                            {user.photoURL ? <img src={user.photoURL} alt="" /> : <div className="avatar-placeholder"><User size={20} /></div>}
+                                        </div>
+                                        <div className="connection-info">
+                                            <span className="username">@{user.username}</span>
+                                            <span className="display-name">{user.displayName || user.username}</span>
+                                        </div>
+                                        <button 
+                                            className={`follow-mini-btn ${followingIds.includes(user.id) ? 'following' : ''}`}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                followingIds.includes(user.id) ? unfollowUser(user.id) : followUser(user.id);
+                                            }}
+                                        >
+                                            {followingIds.includes(user.id) ? 'Подписки' : 'Подписаться'}
+                                        </button>
+                                    </div>
+                                ))
                             )}
                         </div>
                     </motion.div>

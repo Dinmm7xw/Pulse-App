@@ -40,6 +40,7 @@ export const usePulseStore = () => {
   const [activeTab, setActiveTab] = useState<'explore' | 'shouts' | 'chats' | 'profile'>('explore');
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const [friendsLocations, setFriendsLocations] = useState<any[]>([]);
 
   // Sync profile data from Firestore
   useEffect(() => {
@@ -165,6 +166,19 @@ export const usePulseStore = () => {
             setFollowersIds([]);
           }
         );
+
+        // Map: listen to locations of people I follow
+        const qLocs = query(collection(db, "locations"));
+        const unsubLocs = onSnapshot(qLocs, (snapshot) => {
+            const locs = snapshot.docs
+                .map(d => ({ id: d.id, ...d.data() }))
+                .filter(l => l.id !== userId); // Exclude me
+            setFriendsLocations(locs);
+        });
+        
+        return () => {
+            unsubLocs();
+        };
       }
     });
 
@@ -502,6 +516,22 @@ export const usePulseStore = () => {
     }
   }, []);
 
+  const fetchFollowers = useCallback(async (uid: string) => {
+    const snap = await getDocs(collection(db, `users/${uid}/followers`));
+    const ids = snap.docs.map(d => d.id);
+    if (ids.length === 0) return [];
+    const profiles = await getDocs(query(collection(db, "userProfiles"), where("__name__", "in", ids)));
+    return profiles.docs.map(d => ({ id: d.id, ...d.data() }));
+  }, []);
+
+  const fetchFollowing = useCallback(async (uid: string) => {
+    const snap = await getDocs(collection(db, `users/${uid}/following`));
+    const ids = snap.docs.map(d => d.id);
+    if (ids.length === 0) return [];
+    const profiles = await getDocs(query(collection(db, "userProfiles"), where("__name__", "in", ids)));
+    return profiles.docs.map(d => ({ id: d.id, ...d.data() }));
+  }, []);
+
   return { 
     posts, 
     shouts,
@@ -533,6 +563,9 @@ export const usePulseStore = () => {
     viewingUserId,
     setViewingUserId,
     activeChatId,
-    setActiveChatId
+    setActiveChatId,
+    friendsLocations,
+    fetchFollowers,
+    fetchFollowing
   };
 };
