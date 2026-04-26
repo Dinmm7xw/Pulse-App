@@ -259,6 +259,11 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                                         </div>
 
                                         <div className="post-card-footer">
+                                            {post.audioUrl && (
+                                                <div className="post-audio-player" style={{marginBottom: '12px'}}>
+                                                    <audio src={post.audioUrl} controls style={{width: '100%', height: '36px', outline: 'none', borderRadius: '20px'}} />
+                                                </div>
+                                            )}
                                             {post.mediaUrl && (
                                                 <div className="post-description">
                                                     <strong>{post.user}</strong> {post.desc}
