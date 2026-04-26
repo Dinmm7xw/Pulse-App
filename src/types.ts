@@ -103,4 +103,5 @@ export interface UserProfile {
   followersCount?: number;
   followingCount?: number;
   profileMusicUrl?: string;
+  profileMusicName?: string;
 }

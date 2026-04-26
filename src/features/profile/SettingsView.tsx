@@ -10,6 +10,8 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { usePulseStore } from '../../store/useStore';
 import { uploadMedia } from '../../lib/upload';
 import { CloudArchiveModal } from './CloudArchiveModal';
+import { MusicPicker } from '../../components/MusicPicker/MusicPicker';
+import type { ItunesTrack } from '../../services/itunes';
 import './SettingsView.css';
 
 interface SettingsViewProps {
@@ -56,6 +58,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
   // Privacy
   const [hideLocation, setHideLocation] = useState(userProfile.hideLocation || false);
   const [profileMusicUrl, setProfileMusicUrl] = useState(userProfile.profileMusicUrl || '');
+  const [profileMusicName, setProfileMusicName] = useState((userProfile as any).profileMusicName || '');
+  const [isMusicPickerOpen, setIsMusicPickerOpen] = useState(false);
   const isCreator = userProfile.username?.toLowerCase() === 'dplus01';
 
   const handleComingSoon = () => alert("В разработке. Ожидайте в будущих обновлениях!");
@@ -128,7 +132,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
         isProfileComplete: true
       };
       // Only save music URL for the creator
-      if (isCreator) updatePayload.profileMusicUrl = profileMusicUrl;
+      if (isCreator) {
+        updatePayload.profileMusicUrl = profileMusicUrl;
+        updatePayload.profileMusicName = profileMusicName;
+      }
       await updateUserProfile(updatePayload);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -365,14 +372,24 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
                     {isCreator && (
                       <div className="input-group-pulse" style={{border: '1px solid rgba(112,0,255,0.4)', borderRadius: '12px', padding: '12px 16px', background: 'rgba(112,0,255,0.05)'}}>
                         <label style={{color: 'var(--primary-color)'}}>🎵 Музыка профиля (только для DPLUS01)</label>
-                        <input
-                          type="url"
-                          value={profileMusicUrl}
-                          onChange={(e) => setProfileMusicUrl(e.target.value)}
-                          placeholder="Вставьте ссылку на .mp3 файл..."
-                          style={{fontFamily: 'monospace', fontSize: '13px'}}
-                        />
-                        <span style={{fontSize: '11px', opacity: 0.6, marginTop: '4px', display: 'block'}}>Когда кто-то откроет твой профиль — мелодия начнёт играть автоматически 🎵</span>
+                        {profileMusicName ? (
+                          <div style={{display:'flex', alignItems:'center', gap:'10px', padding:'10px', background:'rgba(255,255,255,0.05)', borderRadius:'10px', marginBottom:'8px'}}>
+                            <span style={{fontSize:'20px'}}>🎵</span>
+                            <div style={{flex:1}}>
+                              <div style={{fontWeight:600, fontSize:'13px'}}>{profileMusicName}</div>
+                              <div style={{fontSize:'11px', opacity:0.6}}>Выбранный трек</div>
+                            </div>
+                            <button onClick={() => { setProfileMusicUrl(''); setProfileMusicName(''); }} style={{background:'none', border:'none', color:'#ff4d56', cursor:'pointer', fontSize:'18px'}}>✕</button>
+                          </div>
+                        ) : null}
+                        <button
+                          className="insta-btn"
+                          style={{width:'100%', background:'rgba(112,0,255,0.15)', border:'1px solid rgba(112,0,255,0.4)', color:'var(--primary-color)'}}
+                          onClick={() => setIsMusicPickerOpen(true)}
+                        >
+                          {profileMusicName ? '🔄 Сменить трек' : '🎵 Выбрать из библиотеки'}
+                        </button>
+                        <span style={{fontSize:'11px', opacity:0.6, marginTop:'6px', display:'block'}}>Автоматически заиграет когда кто-то откроет твой профиль 🎵</span>
                       </div>
                     )}
 
@@ -632,13 +649,24 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
       </motion.div>
       <CloudArchiveModal isOpen={isArchiveOpen} onClose={() => {
         setIsArchiveOpen(false);
-        // Refresh count
         if (user?.uid) {
             fetchUserPosts(user.uid).then(posts => {
                 setMediaCount(posts.filter(p => !!p.mediaUrl).length);
             });
         }
       }} />
+      {isMusicPickerOpen && (
+        <div style={{position:'fixed', inset:0, zIndex:9999}}>
+          <MusicPicker
+            onSelectTrack={(track: ItunesTrack) => {
+              setProfileMusicUrl(track.previewUrl || '');
+              setProfileMusicName(`${track.artistName} — ${track.trackName}`);
+              setIsMusicPickerOpen(false);
+            }}
+            onClose={() => setIsMusicPickerOpen(false)}
+          />
+        </div>
+      )}
     </AnimatePresence>
   );
 };

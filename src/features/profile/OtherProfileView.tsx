@@ -26,6 +26,9 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
     const [commentPostId, setCommentPostId] = useState<string | null>(null);
     const [sharePostId, setSharePostId] = useState<string | null>(null);
 
+    const audioInstanceRef = React.useRef<HTMLAudioElement | null>(null);
+    const [nowPlayingName, setNowPlayingName] = useState<string | null>(null);
+
     useEffect(() => {
         const loadData = async () => {
             setIsLoading(true);
@@ -41,10 +44,17 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
                 audio.volume = 0.4;
                 audio.loop = true;
                 audio.play().catch(() => {});
-                return () => audio.pause();
+                audioInstanceRef.current = audio;
+                setNowPlayingName((userProfile as any)?.profileMusicName || '🎵 Трек');
             }
         };
         loadData();
+
+        return () => {
+            audioInstanceRef.current?.pause();
+            audioInstanceRef.current = null;
+            setNowPlayingName(null);
+        };
     }, [uid, fetchUserProfile, fetchUserPosts]);
 
     const isFollowing = followingIds.includes(uid);
@@ -89,6 +99,25 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
                 <h3>@{profile.username}</h3>
                 <div style={{ width: 40 }} />
             </header>
+
+            {nowPlayingName && (
+                <div style={{
+                    background: 'linear-gradient(90deg, rgba(112,0,255,0.2), rgba(112,0,255,0.05))',
+                    borderBottom: '1px solid rgba(112,0,255,0.2)',
+                    padding: '8px 16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    fontSize: '13px'
+                }}>
+                    <span style={{animation: 'pulse 1.5s infinite', display:'inline-block'}}>🎵</span>
+                    <span style={{opacity:0.9}}>{nowPlayingName}</span>
+                    <button
+                        onClick={() => { audioInstanceRef.current?.pause(); setNowPlayingName(null); }}
+                        style={{marginLeft:'auto', background:'none', border:'none', color:'rgba(255,255,255,0.5)', cursor:'pointer', fontSize:'16px'}}
+                    >✕</button>
+                </div>
+            )}
 
             <div className="other-profile-scroll">
                 <div className="profile-main-info">
