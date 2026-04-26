@@ -220,6 +220,7 @@ export const usePulseStore = () => {
             postId,
             userId: auth.currentUser.uid,
             user: userProfile.displayName || userProfile.username || 'User',
+            userUsername: userProfile.username || '',
             userAvatar: userProfile.photoURL || '',
             text,
             timestamp: serverTimestamp()
@@ -269,6 +270,8 @@ export const usePulseStore = () => {
         await addDoc(collection(db, `chats/${chatId}/messages`), {
             senderId: auth.currentUser.uid,
             senderName: userProfile.displayName || auth.currentUser.displayName || 'User',
+            senderUsername: userProfile.username || '',
+            senderAvatar: userProfile.photoURL || auth.currentUser.photoURL || '',
             text,
             type: 'text',
             timestamp: serverTimestamp()

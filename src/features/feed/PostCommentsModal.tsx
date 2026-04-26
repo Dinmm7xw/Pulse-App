@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
+import { CreatorBadge } from '../../components/CreatorBadge';
 import type { Comment } from '../../types';
 import './PostCommentsModal.css';
 
@@ -77,7 +78,10 @@ export const PostCommentsModal: React.FC<PostCommentsModalProps> = ({ postId, on
                                     </div>
                                     <div className="comment-body">
                                         <div className="comment-user">
-                                            <span className="username">{comment.user}</span>
+                                            <span className="username">
+                                                {comment.user}
+                                                <CreatorBadge username={comment.userUsername} size={14} />
+                                            </span>
                                             <span className="time">{formatTime(comment.timestamp)}</span>
                                         </div>
                                         <div className="comment-text">{comment.text}</div>

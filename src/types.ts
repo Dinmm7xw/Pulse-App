@@ -39,6 +39,8 @@ export interface Comment {
   postId: string;
   userId: string;
   user: string;
+  userUsername?: string;
+  userAvatar?: string;
   text: string;
   timestamp: any;
 }
@@ -48,6 +50,8 @@ export interface Message {
   chatId: string;
   senderId: string;
   senderName: string;
+  senderUsername?: string;
+  senderAvatar?: string;
   text: string;
   timestamp: any;
   type?: 'text' | 'image' | 'audio';

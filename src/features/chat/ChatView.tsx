@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Plus, ChevronLeft, Send, Phone, Video, Mic, MicOff, Volume2 } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
+import { CreatorBadge } from '../../components/CreatorBadge';
 import type { Message, Chat } from '../../types';
 import { auth } from '../../lib/firebase';
 import './ChatView.css';
@@ -185,7 +186,10 @@ export const ChatView: React.FC = () => {
                     <div className="header-info">
                         <img src={chatAvatar || NEUTRAL_AVATAR} className="header-avatar" alt="" />
                         <div className="text-info">
-                            <span className="name">{chatName}</span>
+                            <span className="name">
+                                {chatName}
+                                <CreatorBadge username={chatName} size={16} />
+                            </span>
                             <span className="status">{activeChat.type === 'community' ? 'Сообщество' : 'В сети'}</span>
                         </div>
                     </div>
@@ -205,7 +209,10 @@ export const ChatView: React.FC = () => {
                         <div key={m.id} className={`msg-bubble-wrap ${m.senderId === myId ? 'sent' : 'received'}`}>
                             <div className="msg-bubble">
                                 {m.senderId !== myId && activeChat.type === 'community' && (
-                                    <span className="sender-name">{m.senderName}</span>
+                                    <span className="sender-name">
+                                        {m.senderName}
+                                        <CreatorBadge username={m.senderUsername} size={12} />
+                                    </span>
                                 )}
                                 <p>{m.text}</p>
                                 <span className="msg-time-small">{formatTime(m.timestamp)}</span>
@@ -279,7 +286,10 @@ export const ChatView: React.FC = () => {
                                 </div>
                                 <div className="chat-info">
                                     <div className="chat-top">
-                                        <span className="chat-name">{chatName}</span>
+                                        <span className="chat-name">
+                                            {chatName}
+                                            <CreatorBadge username={chatName} size={14} />
+                                        </span>
                                         <span className="chat-time">{formatTime(chat.lastTime)}</span>
                                     </div>
                                     <div className="chat-bottom">

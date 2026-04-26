@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionsSheet } from '../../components/ConnectionsSheet';
 import { CommentsSheet } from '../../components/CommentsSheet';
 import { ShareSheet } from '../../components/ShareSheet';
+import { CreatorBadge } from '../../components/CreatorBadge';
 import './ProfileView.css';
 
 type ProfileTab = 'grid' | 'saved' | 'anonymous';
@@ -52,7 +53,10 @@ export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSe
         <div className="profile-view-insta">
             <header className="insta-header">
                 <button className="icon-btn" onClick={() => window.location.reload()}><ChevronLeft size={24} /></button>
-                <h3>{userProfile.username || user?.displayName || user?.email?.split('@')[0]}</h3>
+                <h3>
+                    {userProfile.username || user?.displayName || user?.email?.split('@')[0]}
+                    <CreatorBadge username={userProfile.username} size={18} />
+                </h3>
                 <div className="header-actions">
                     <button className="icon-btn" onClick={onOpenSettings}><Settings size={22} /></button>
                 </div>
@@ -175,7 +179,10 @@ export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSe
                                     <div className="post-header-mini">
                                         <div className="mini-author-info">
                                             <img src={userProfile.photoURL || NEUTRAL_AVATAR} className="mini-avatar" alt="" />
-                                            <strong>{selectedPost.isAnonymous ? 'Анонимно' : (userProfile.username || 'user')}</strong>
+                                            <strong>
+                                                {selectedPost.isAnonymous ? 'Анонимно' : (userProfile.username || 'user')}
+                                                <CreatorBadge username={selectedPost.isAnonymous ? '' : userProfile.username} size={14} />
+                                            </strong>
                                         </div>
                                         <p className="detail-desc">{selectedPost.desc || selectedPost.text}</p>
                                     </div>
