@@ -25,7 +25,7 @@ function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [isPrivacyCenterOpen, setIsPrivacyCenterOpen] = useState(false);
-  const [refreshProfileKey, setRefreshProfileKey] = useState(0);
+  const [, setRefreshProfileKey] = useState(0);
   const { addPost, userLocation, userProfile, updateLocation } = usePulseStore();
 
   useEffect(() => {

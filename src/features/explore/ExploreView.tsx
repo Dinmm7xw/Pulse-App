@@ -4,7 +4,7 @@ import { usePulseStore } from '../../store/useStore';
 import { auth } from '../../lib/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PostCommentsModal } from '../feed/PostCommentsModal';
-import { StoryViewer } from './StoryViewer';
+import { StoryViewer } from '../feed/StoryViewer';
 import { NotificationsModal } from './NotificationsModal';
 import './ExploreView.css';
 

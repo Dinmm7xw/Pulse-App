@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Search, Plus, ChevronLeft, Send, Phone, Video, X, Mic, MicOff, Volume2 } from 'lucide-react';
+import { Plus, ChevronLeft, Send, Phone, Video, Mic, MicOff, Volume2 } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
 import type { Message, Chat } from '../../types';
 import { auth } from '../../lib/firebase';
@@ -15,7 +15,7 @@ export const ChatView: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');
     const [filter, setFilter] = useState<ChatFilter>('all');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery] = useState('');
     const [showNewChat, setShowNewChat] = useState(false);
     const [userSearchQuery, setUserSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -88,7 +88,7 @@ export const ChatView: React.FC = () => {
         }
     };
 
-    const startCall = (type: 'audio' | 'video') => {
+    const startCall = (_type: 'audio' | 'video') => {
         alert("Звонки находятся в разработке. Ожидайте в будущих обновлениях!");
     };
 
