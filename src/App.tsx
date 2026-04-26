@@ -109,13 +109,16 @@ function App() {
         }}
       >
         {activeTab === 'map' && <MapView />}
-        {activeTab === 'explore' && <ExploreView onViewProfile={(uid) => {
-          if (uid === auth.currentUser?.uid) {
-            setActiveTab('profile');
-          } else {
-            setViewingUserId(uid);
-          }
-        }} />}
+        {activeTab === 'explore' && <ExploreView 
+          onViewProfile={(uid) => {
+            if (uid === auth.currentUser?.uid) {
+              setActiveTab('profile');
+            } else {
+              setViewingUserId(uid);
+            }
+          }} 
+          onViewMap={() => setActiveTab('map')}
+        />}
         {activeTab === 'chats' && <ChatView />}
         {activeTab === 'profile' && <ProfileView onOpenSettings={() => setIsSettingsOpen(true)} />}
       </AppLayout>

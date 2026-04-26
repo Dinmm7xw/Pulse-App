@@ -2,18 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { Search, User, UserPlus, UserCheck, Loader2, Bell, MapPin, Heart, MessageCircle, MoreHorizontal } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PostCommentsModal } from '../feed/PostCommentsModal';
 import './ExploreView.css';
 
 interface ExploreViewProps {
     onViewProfile: (uid: string) => void;
+    onViewMap?: () => void;
 }
 
-export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
+export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewMap }) => {
     const { searchUsers, followUser, unfollowUser, followingIds, posts, likePost } = usePulseStore();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [activeTab, setActiveTab] = useState<'following' | 'near' | 'interests'>('near');
+    const [commentPostId, setCommentPostId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!searchQuery.trim()) {
@@ -57,6 +60,18 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
         if (hours < 24) return `${hours} ч. назад`;
         return `${Math.floor(hours/24)} д. назад`;
     };
+
+    // Filter posts based on active tab
+    const displayedPosts = recommendedPosts.filter(post => {
+        if (activeTab === 'following') {
+            return followingIds.includes(post.userId || '');
+        }
+        if (activeTab === 'near') {
+            return !!(post.location || post.city);
+        }
+        // interests
+        return true;
+    });
 
     return (
         <div className="explore-view">
@@ -181,10 +196,13 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
 
                             {/* Classic Feed Cards */}
                             <div className="classic-feed-container">
-                                {recommendedPosts.map(post => (
+                                {displayedPosts.length === 0 && (
+                                    <div className="no-results">Здесь пока ничего нет. Подпишитесь на кого-нибудь!</div>
+                                )}
+                                {displayedPosts.map(post => (
                                     <div className="post-card" key={`feed-${post.id}`}>
                                         <div className="post-card-header">
-                                            <div className="post-user-info" onClick={() => onViewProfile(post.userId)}>
+                                            <div className="post-user-info" onClick={() => onViewProfile(post.userId || '')}>
                                                 <img src={post.userAvatar || '/default-avatar.png'} className="post-avatar" alt="" />
                                                 <div className="post-user-details">
                                                     <span className="post-display-name">
@@ -231,12 +249,12 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
                                                         <Heart size={20} />
                                                         <span>{post.likesCount || 0}</span>
                                                     </button>
-                                                    <button className="post-action-btn">
+                                                    <button className="post-action-btn" onClick={() => setCommentPostId(post.id)}>
                                                         <MessageCircle size={20} />
-                                                        <span>0</span>
+                                                        <span>{post.commentsCount || 0}</span>
                                                     </button>
                                                 </div>
-                                                <button className="post-view-map-btn">
+                                                <button className="post-view-map-btn" onClick={() => onViewMap && onViewMap()}>
                                                     <MapPin size={14} style={{marginRight: '4px'}} />
                                                     На карте
                                                 </button>
@@ -248,6 +266,11 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile }) => {
                         </motion.div>
                     )}
                 </AnimatePresence>
+
+                <PostCommentsModal 
+                    postId={commentPostId} 
+                    onClose={() => setCommentPostId(null)} 
+                />
             </div>
         </div>
     );
