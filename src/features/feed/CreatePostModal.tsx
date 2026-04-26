@@ -244,15 +244,33 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
         });
         
         // Note: Future step is updating addPost to accept additional metadata
-        // For now, let's reset
+        // Fully reset state after publish
         setText(''); 
-        setCapturedImage(null); 
+        setCapturedImage(null);
+        setCapturedVideo(null);
         setMediaBlob(null); 
         setSelectedTrack(null);
         setIsUploading(false); 
         setMode('camera'); 
+        setStep('CAPTURE');
         onClose();
     };
+
+    // Reset state when modal is closed to avoid "stuck" UI on reopen
+    useEffect(() => {
+        if (!isOpen) {
+            setText('');
+            setCapturedImage(null);
+            setCapturedVideo(null);
+            setMediaBlob(null);
+            setSelectedTrack(null);
+            setIsUploading(false);
+            setMode('camera');
+            setStep('CAPTURE');
+            setIsRecording(false);
+            setRecordingTime(0);
+        }
+    }, [isOpen]);
 
 
 
@@ -424,7 +442,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                                 ) : (
                                 <div className="finalize-mode">
                                     <header className="finalize-header">
-                                        <button className="back-arrow-btn" onClick={() => setMode('camera')}>←</button>
+                                        <button className="back-arrow-btn" onClick={() => setStep('EDIT')}>←</button>
                                         <h3>Новая публикация</h3>
                                         <button className="publish-final-btn" onClick={handlePublish} disabled={isUploading}>
                                             {isUploading ? <Loader className="spin" /> : 'Опубликовать'}
