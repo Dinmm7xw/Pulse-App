@@ -71,10 +71,16 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
     // Fake trending stories from posts with media
     const trendingStories = recommendedPosts.filter(p => p.mediaUrl).slice(0, 6);
 
-    const formatTime = (ts: number) => {
-        const diff = Date.now() - ts;
+    const formatTime = (ts: any) => {
+        if (!ts) return 'Только что';
+        const ms = ts.seconds ? ts.seconds * 1000 : (typeof ts === 'number' ? ts : (ts.toMillis ? ts.toMillis() : Date.now()));
+        const diff = Date.now() - ms;
         const hours = Math.floor(diff / (1000 * 60 * 60));
-        if (hours < 1) return 'Только что';
+        if (hours < 1) {
+            const mins = Math.floor(diff / (1000 * 60));
+            if (mins < 1) return 'Только что';
+            return `${mins} м. назад`;
+        }
         if (hours < 24) return `${hours} ч. назад`;
         return `${Math.floor(hours/24)} д. назад`;
     };
@@ -227,7 +233,10 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                                                         {post.user}
                                                         {post.likesCount > 100 && <span style={{color:'var(--primary-color)'}}>✓</span>}
                                                     </span>
-                                                    <span className="post-meta">{post.location || post.city || 'Город'} • {formatTime(post.timestamp)}</span>
+                                                    <span className="post-meta">
+                                                        {post.location || post.city || 'Город'} • {formatTime(post.timestamp)}
+                                                        {post.audioName && <span> • 🎵 {post.audioName}</span>}
+                                                    </span>
                                                 </div>
                                             </div>
                                             <button className="action-btn" onClick={() => alert("Опции поста:\n- Скопировать ссылку\n- Пожаловаться")}>
