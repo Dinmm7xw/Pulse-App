@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PostCommentsModal } from '../feed/PostCommentsModal';
 import { StoryViewer } from '../feed/StoryViewer';
 import { NotificationsModal } from './NotificationsModal';
+import { CreatorBadge } from '../../components/CreatorBadge';
 import './ExploreView.css';
 
 interface ExploreViewProps {
@@ -275,7 +276,8 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                                                 <div className="post-user-details">
                                                     <span className="post-display-name">
                                                         {post.user}
-                                                        {post.likesCount > 100 && <span style={{color:'var(--primary-color)'}}>✓</span>}
+                                                        <CreatorBadge username={post.user} size={18} />
+                                                        {post.likesCount > 100 && !post.user?.toLowerCase().startsWith('dplus01') && <span style={{color:'var(--primary-color)'}}>✓</span>}
                                                     </span>
                                                     <span className="post-meta">
                                                         {post.location || post.city || 'Город'} • {formatTime(post.timestamp)}

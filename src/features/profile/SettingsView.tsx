@@ -4,8 +4,9 @@ import {
   User, Shield, Bell, HelpCircle, X, ChevronRight, 
   Camera, Lock, LogOut, FileText, ChevronLeft, Eye, EyeOff
 } from 'lucide-react';
-import { auth } from '../../lib/firebase';
+import { auth, db } from '../../lib/firebase';
 import { updateProfile, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from 'firebase/auth';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { usePulseStore } from '../../store/useStore';
 import { uploadMedia } from '../../lib/upload';
 import { CloudArchiveModal } from './CloudArchiveModal';
@@ -54,6 +55,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
   
   // Privacy
   const [hideLocation, setHideLocation] = useState(userProfile.hideLocation || false);
+  const [profileMusicUrl, setProfileMusicUrl] = useState(userProfile.profileMusicUrl || '');
+  const isCreator = userProfile.username?.toLowerCase() === 'dplus01';
 
   const handleComingSoon = () => alert("В разработке. Ожидайте в будущих обновлениях!");
 
@@ -105,13 +108,28 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
     setIsSaving(true);
     setErrorMsg('');
     try {
+      // Check username uniqueness (skip if unchanged)
+      const newUsername = formData.username.toLowerCase().trim();
+      if (newUsername !== (userProfile.username || '').toLowerCase()) {
+        const q = query(collection(db, 'userProfiles'), where('username', '==', newUsername));
+        const snap = await getDocs(q);
+        const takenByOther = snap.docs.some(d => d.id !== user.uid);
+        if (takenByOther) {
+          setErrorMsg('Это имя пользователя уже занято. Попробуйте другое.');
+          setIsSaving(false);
+          return;
+        }
+      }
       await updateProfile(user, { displayName: formData.displayName });
-      await updateUserProfile({ 
+      const updatePayload: any = { 
         bio: formData.bio, 
-        username: formData.username,
+        username: newUsername,
         displayName: formData.displayName,
         isProfileComplete: true
-      });
+      };
+      // Only save music URL for the creator
+      if (isCreator) updatePayload.profileMusicUrl = profileMusicUrl;
+      await updateUserProfile(updatePayload);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error: any) {
@@ -343,6 +361,20 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
                       <textarea value={formData.bio} onChange={(e) => setFormData({...formData, bio: e.target.value})} rows={3} placeholder="Расскажите о себе..." maxLength={300} />
                       <span className="char-count">{formData.bio.length}/300</span>
                     </div>
+
+                    {isCreator && (
+                      <div className="input-group-pulse" style={{border: '1px solid rgba(112,0,255,0.4)', borderRadius: '12px', padding: '12px 16px', background: 'rgba(112,0,255,0.05)'}}>
+                        <label style={{color: 'var(--primary-color)'}}>🎵 Музыка профиля (только для DPLUS01)</label>
+                        <input
+                          type="url"
+                          value={profileMusicUrl}
+                          onChange={(e) => setProfileMusicUrl(e.target.value)}
+                          placeholder="Вставьте ссылку на .mp3 файл..."
+                          style={{fontFamily: 'monospace', fontSize: '13px'}}
+                        />
+                        <span style={{fontSize: '11px', opacity: 0.6, marginTop: '4px', display: 'block'}}>Когда кто-то откроет твой профиль — мелодия начнёт играть автоматически 🎵</span>
+                      </div>
+                    )}
 
                     <button className={`save-btn ${saveSuccess ? 'success' : ''}`} onClick={handleSaveProfile} disabled={isSaving}>
                       {isSaving ? 'Сохранение...' : saveSuccess ? '✓ Сохранено!' : 'Сохранить профиль'}

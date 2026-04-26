@@ -101,4 +101,5 @@ export interface UserProfile {
   isProfileComplete?: boolean;
   followersCount?: number;
   followingCount?: number;
+  profileMusicUrl?: string;
 }

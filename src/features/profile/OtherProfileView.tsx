@@ -7,6 +7,7 @@ import { ConnectionsSheet } from '../../components/ConnectionsSheet';
 import { ShareSheet } from '../../components/ShareSheet';
 import { CommentsSheet } from '../../components/CommentsSheet';
 import type { Post, UserProfile } from '../../types';
+import { CreatorBadge } from '../../components/CreatorBadge';
 import './OtherProfileView.css';
 
 interface OtherProfileViewProps {
@@ -33,6 +34,15 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
             setProfile(userProfile as any);
             setPosts(userPosts);
             setIsLoading(false);
+
+            // Autoplay profile music if set
+            if ((userProfile as any)?.profileMusicUrl) {
+                const audio = new Audio((userProfile as any).profileMusicUrl);
+                audio.volume = 0.4;
+                audio.loop = true;
+                audio.play().catch(() => {});
+                return () => audio.pause();
+            }
         };
         loadData();
     }, [uid, fetchUserProfile, fetchUserPosts]);
@@ -106,7 +116,10 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
                     </div>
 
                     <div className="profile-bio">
-                        <span className="full-name">{profile.displayName || profile.username}</span>
+                        <span className="full-name" style={{display:'flex', alignItems:'center', gap:'6px'}}>
+                            {profile.displayName || profile.username}
+                            <CreatorBadge username={profile.username} size={22} />
+                        </span>
                         <p>{profile.bio || 'Пользователь Pulse'}</p>
                     </div>
 
