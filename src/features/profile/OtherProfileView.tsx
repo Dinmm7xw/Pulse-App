@@ -16,7 +16,7 @@ interface OtherProfileViewProps {
 }
 
 export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose }) => {
-    const { fetchUserProfile, fetchUserPosts, followUser, unfollowUser, followingIds, createDirectChat, likePost } = usePulseStore();
+    const { fetchUserProfile, fetchUserPosts, followUser, unfollowUser, followingIds, createDirectChat, likePost, setActiveTab, setActiveChatId, setViewingUserId } = usePulseStore();
     const [profile, setProfile] = useState<(UserProfile & { id: string }) | null>(null);
     const [posts, setPosts] = useState<Post[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -71,7 +71,10 @@ export const OtherProfileView: React.FC<OtherProfileViewProps> = ({ uid, onClose
         if (profile) {
             const chat = await createDirectChat(profile.id, profile.displayName || profile.username, profile.photoURL || '');
             if (chat) {
-                alert("Чат создан! Перейдите в раздел сообщений.");
+                setActiveTab('chats');
+                setActiveChatId(chat.id);
+                setViewingUserId(null);
+                onClose();
             }
         }
     };

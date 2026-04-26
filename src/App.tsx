@@ -21,13 +21,21 @@ import { IOSInstallPrompt } from './components/IOSInstallPrompt';
 function App() {
   const [user, setUser] = useState<any>(null);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
-  const [activeTab, setActiveTab] = useState('map');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [isPrivacyCenterOpen, setIsPrivacyCenterOpen] = useState(false);
   const [, setRefreshProfileKey] = useState(0);
-  const { addPost, userLocation, userProfile, updateLocation, profileLoaded } = usePulseStore();
+  const { 
+    addPost, 
+    userLocation, 
+    userProfile, 
+    updateLocation, 
+    profileLoaded,
+    activeTab,
+    setActiveTab,
+    viewingUserId,
+    setViewingUserId
+  } = usePulseStore();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {

@@ -12,7 +12,7 @@ interface CommentsSheetProps {
 }
 
 export const CommentsSheet: React.FC<CommentsSheetProps> = ({ isOpen, onClose, postId }) => {
-    const { addComment, listenToComments } = usePulseStore();
+    const { addComment, listenToComments, setViewingUserId } = usePulseStore();
     const [comments, setComments] = useState<Comment[]>([]);
     const [newComment, setNewComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);

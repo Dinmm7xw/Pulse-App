@@ -11,7 +11,7 @@ type ChatFilter = 'all' | 'direct' | 'community';
 const NEUTRAL_AVATAR = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23555555'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E`;
 
 export const ChatView: React.FC = () => {
-    const { sendMessage, listenToMessages, chats, createDirectChat, searchUsers } = usePulseStore();
+    const { sendMessage, listenToMessages, chats, createDirectChat, searchUsers, activeChatId, setActiveChatId, setActiveTab } = usePulseStore();
     const [activeChat, setActiveChat] = useState<Chat | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputText, setInputText] = useState('');
@@ -24,6 +24,8 @@ export const ChatView: React.FC = () => {
     const [activeCall, setActiveCall] = useState<{ type: 'audio' | 'video'; name: string; avatar: string } | null>(null);
     const [isMuted, setIsMuted] = useState(false);
     const [callDuration, setCallDuration] = useState(0);
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordTime, setRecordTime] = useState(0);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const callTimerRef = useRef<any>(null);
 
@@ -38,6 +40,16 @@ export const ChatView: React.FC = () => {
             return matchesFilter && matchesSearch;
         });
     }, [chats, filter, searchQuery, myId]);
+
+    // Sync activeChat from activeChatId
+    useEffect(() => {
+        if (activeChatId) {
+            const chat = chats.find(c => c.id === activeChatId);
+            if (chat) setActiveChat(chat);
+        } else {
+            setActiveChat(null);
+        }
+    }, [activeChatId, chats]);
 
     useEffect(() => {
         if (activeChat) {
@@ -180,7 +192,7 @@ export const ChatView: React.FC = () => {
         return (
             <div className="chat-detail-view">
                 <header className="chat-header-detailed">
-                    <button className="back-btn" onClick={() => setActiveChat(null)}>
+                    <button className="back-btn" onClick={() => setActiveChatId(null)}>
                         <ChevronLeft size={24} />
                     </button>
                     <div className="header-info">
@@ -230,20 +242,40 @@ export const ChatView: React.FC = () => {
                 <div className="chat-input-row">
                     <input 
                         type="text" 
-                        placeholder="Сообщение..." 
+                        placeholder={isRecording ? `Запись: ${recordTime}с` : "Сообщение..."} 
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                        disabled={isRecording}
                     />
                     {inputText.trim() ? (
                         <button className="send-btn" onClick={handleSend}><Send size={18} /></button>
                     ) : (
-                        <button className="action-btn"><Mic size={22} /></button>
+                        <button 
+                            className={`action-btn ${isRecording ? 'recording' : ''}`}
+                            onClick={() => {
+                                if (isRecording) {
+                                    setIsRecording(false);
+                                    alert("Голосовое сообщение отправлено!");
+                                } else {
+                                    setIsRecording(true);
+                                    setRecordTime(0);
+                                    const timer = setInterval(() => setRecordTime(t => t + 1), 1000);
+                                    setTimeout(() => clearInterval(timer), 30000);
+                                }
+                            }}
+                        >
+                            <Mic size={22} color={isRecording ? "#ff4d56" : "white"} />
+                        </button>
                     )}
                 </div>
             </div>
         );
     }
+
+    const handleChatClick = (chat: Chat) => {
+        setActiveChatId(chat.id);
+    };
 
     // ====== CHAT LIST VIEW ======
     return (
@@ -279,7 +311,7 @@ export const ChatView: React.FC = () => {
                         const chatAvatar = chat.participantAvatars?.[otherUserId] || '';
 
                         return (
-                            <div key={chat.id} className="chat-item-premium" onClick={() => setActiveChat(chat)}>
+                            <div key={chat.id} className="chat-item-premium" onClick={() => handleChatClick(chat)}>
                                 <div className="avatar-wrapper">
                                     <img src={chatAvatar || NEUTRAL_AVATAR} className="avatar-img" alt={chatName} />
                                     {chat.type === 'community' && <div className="community-badge">P</div>}

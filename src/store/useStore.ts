@@ -36,6 +36,11 @@ export const usePulseStore = () => {
   const [userProfile, setUserProfile] = useState<UserProfile>({ bio: '', username: '', followersCount: 0, followingCount: 0 });
   const [chats, setChats] = useState<Chat[]>([]);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  
+  // Navigation State
+  const [activeTab, setActiveTab] = useState<'explore' | 'shouts' | 'chats' | 'profile'>('explore');
+  const [viewingUserId, setViewingUserId] = useState<string | null>(null);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
   // Sync profile data from Firestore
   useEffect(() => {
@@ -540,6 +545,12 @@ export const usePulseStore = () => {
         } catch (error) {
             console.error("Error reposting:", error);
         }
-    }
+    },
+    activeTab,
+    setActiveTab,
+    viewingUserId,
+    setViewingUserId,
+    activeChatId,
+    setActiveChatId
   };
 };

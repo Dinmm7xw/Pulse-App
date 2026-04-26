@@ -81,6 +81,12 @@
   overflow: hidden;
 }
 
+.insta-avatar-inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .insta-stats {
   flex: 1;
   display: flex;
