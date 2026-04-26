@@ -49,7 +49,7 @@ function App() {
   }
 
   if (!user) {
-    return <LoginView onLogin={() => {}} />;
+    return <LoginView />;
   }
 
   // Onboarding logic: check if profile is complete

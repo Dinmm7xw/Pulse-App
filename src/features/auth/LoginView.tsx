@@ -7,12 +7,12 @@ import { Capacitor } from '@capacitor/core';
 import './LoginView.css';
 
 interface LoginViewProps {
-    onLogin: () => void;
+    // onLogin is handled globally via onAuthStateChanged in useStore
 }
 
 type AuthMode = 'options' | 'phone' | 'otp' | 'email' | 'reset';
 
-export const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
+export const LoginView: React.FC = () => {
     const [mode, setMode] = useState<AuthMode>('options');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [otp, setOtp] = useState('');

@@ -171,21 +171,7 @@ export const usePulseStore = () => {
     };
   }, []);
 
-  // Real-time locations listener
-  useEffect(() => {
-    const q = query(collection(db, "locations"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const locationsData = snapshot.docs
-        .filter(doc => followingIds.includes(doc.id))
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as UserLocation[];
-      setFriendsLocations(locationsData);
-    });
 
-    return () => unsubscribe();
-  }, [followingIds]);
 
   const addPost = useCallback(async (newPost: Omit<Post, 'id' | 'timestamp'>) => {
     try {
