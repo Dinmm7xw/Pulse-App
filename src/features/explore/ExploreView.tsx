@@ -13,6 +13,9 @@ interface ExploreViewProps {
     onViewProfile: (uid: string) => void;
     onViewMap?: () => void;
 }
+
+const ANON_AVATAR = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23888888'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E`;
+
 const AutoPlayMedia: React.FC<{ post: any }> = ({ post }) => {
     const containerRef = React.useRef<HTMLDivElement>(null);
     const videoRef = React.useRef<HTMLVideoElement>(null);
@@ -237,8 +240,12 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                                                 <img src={story.mediaUrl} className="story-media" alt="" />
                                             )}
                                             <div className="story-overlay">
-                                                <img src={story.userAvatar || '/default-avatar.png'} className="story-avatar" alt="" />
-                                                <span className="story-username">{story.user}</span>
+                                                <img 
+                                                    src={story.isAnonymous ? ANON_AVATAR : (story.userAvatar || '/default-avatar.png')} 
+                                                    className="story-avatar" 
+                                                    alt="" 
+                                                />
+                                                <span className="story-username">{story.isAnonymous ? 'Аноним' : story.user}</span>
                                             </div>
                                         </div>
                                     ))}
@@ -280,7 +287,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                                         <div className="post-card-header">
                                             <div className="post-user-info" onClick={() => !post.isAnonymous && onViewProfile(post.userId || '')}>
                                                 <img 
-                                                    src={post.isAnonymous ? 'https://cdn-icons-png.flaticon.com/512/149/149071.png' : (post.userAvatar || '/default-avatar.png')} 
+                                                    src={post.isAnonymous ? ANON_AVATAR : (post.userAvatar || '/default-avatar.png')} 
                                                     className={`post-avatar ${post.isAnonymous ? 'anon-avatar' : ''}`} 
                                                     alt="" 
                                                 />
