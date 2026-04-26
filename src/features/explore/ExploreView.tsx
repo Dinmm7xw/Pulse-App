@@ -12,6 +12,50 @@ interface ExploreViewProps {
     onViewProfile: (uid: string) => void;
     onViewMap?: () => void;
 }
+const AutoPlayMedia: React.FC<{ post: any }> = ({ post }) => {
+    const containerRef = React.useRef<HTMLDivElement>(null);
+    const videoRef = React.useRef<HTMLVideoElement>(null);
+    const audioRef = React.useRef<HTMLAudioElement>(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        videoRef.current?.play().catch(() => {});
+                        audioRef.current?.play().catch(() => {});
+                    } else {
+                        videoRef.current?.pause();
+                        audioRef.current?.pause();
+                    }
+                });
+            },
+            { threshold: 0.5 }
+        );
+
+        if (containerRef.current) observer.observe(containerRef.current);
+        return () => observer.disconnect();
+    }, []);
+
+    const isVideo = post.mediaUrl?.includes('/video/upload/');
+
+    return (
+        <div ref={containerRef} className="post-media-container">
+            {post.mediaUrl ? (
+                isVideo ? (
+                    <video ref={videoRef} src={post.mediaUrl} className="post-media" playsInline loop muted={!!post.audioUrl} />
+                ) : (
+                    <img src={post.mediaUrl} className="post-media" alt="" />
+                )
+            ) : (
+                <div className="post-text-content" style={{ background: post.color || '#222' }}>
+                    <p>{post.desc}</p>
+                </div>
+            )}
+            {post.audioUrl && <audio ref={audioRef} src={post.audioUrl} loop />}
+        </div>
+    );
+};
 
 export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewMap }) => {
     const { searchUsers, followUser, unfollowUser, followingIds, posts, likePost } = usePulseStore();
@@ -244,26 +288,9 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                                             </button>
                                         </div>
 
-                                        <div className="post-media-container">
-                                            {post.mediaUrl ? (
-                                                post.mediaUrl.includes('/video/upload/') ? (
-                                                    <video src={post.mediaUrl} className="post-media" controls playsInline />
-                                                ) : (
-                                                    <img src={post.mediaUrl} className="post-media" alt="" />
-                                                )
-                                            ) : (
-                                                <div className="post-text-content" style={{ background: post.color || '#222' }}>
-                                                    <p>{post.desc}</p>
-                                                </div>
-                                            )}
-                                        </div>
+                                        <AutoPlayMedia post={post} />
 
                                         <div className="post-card-footer">
-                                            {post.audioUrl && (
-                                                <div className="post-audio-player" style={{marginBottom: '12px'}}>
-                                                    <audio src={post.audioUrl} controls style={{width: '100%', height: '36px', outline: 'none', borderRadius: '20px'}} />
-                                                </div>
-                                            )}
                                             {post.mediaUrl && (
                                                 <div className="post-description">
                                                     <strong>{post.user}</strong> {post.desc}
