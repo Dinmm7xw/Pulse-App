@@ -52,6 +52,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
     const [isRecording, setIsRecording] = useState(false);
     const [recordingTime, setRecordingTime] = useState(0);
     const [activeFilter, setActiveFilter] = useState('none');
+    const [beautifyOn, setBeautifyOn] = useState(false);
     const [timer, setTimer] = useState<0 | 3 | 10>(0);
     const [isCountingDown, setIsCountingDown] = useState(false);
     const [countdown, setCountdown] = useState(0);
@@ -204,9 +205,25 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
     };
 
     const cycleFilter = () => {
-        const filters = ['none', 'sepia(0.5)', 'grayscale(1)', 'hue-rotate(90deg)', 'brightness(1.5)'];
+        const filters = [
+            'none', 
+            'brightness(1.1) contrast(1.1) saturate(1.2)', // Vivid
+            'grayscale(1) contrast(1.2)', // Noir
+            'sepia(0.3) contrast(1.1) brightness(0.9)', // Retro
+            'hue-rotate(180deg) saturate(0.8)', // Cinema
+            'brightness(1.2) blur(0.5px) contrast(0.9)', // Dreamy
+        ];
         const currentIdx = filters.indexOf(activeFilter);
         setActiveFilter(filters[(currentIdx + 1) % filters.length]);
+    };
+
+    const getFilterString = () => {
+        let base = activeFilter === 'none' ? '' : activeFilter;
+        if (beautifyOn) {
+            // Beauty effect: smooth skin (blur) + brightness + soft contrast
+            base += ' brightness(1.05) contrast(1.05) saturate(1.1) blur(0.3px)';
+        }
+        return base || 'none';
     };
 
     const capturePhoto = () => {
@@ -214,7 +231,11 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
         const canvas = canvasRef.current;
         canvas.width = videoRef.current.videoWidth;
         canvas.height = videoRef.current.videoHeight;
-        canvas.getContext('2d')?.drawImage(videoRef.current, 0, 0);
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            ctx.filter = getFilterString();
+            ctx.drawImage(videoRef.current, 0, 0);
+        }
         canvas.toBlob((blob) => {
             if (blob) {
                 setCapturedImage(URL.createObjectURL(blob));
@@ -334,7 +355,14 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                         >
                             {step === 'CAPTURE' ? (
                                     <div className="camera-view">
-                                        <video ref={videoRef} autoPlay playsInline muted className="camera-video-preview" style={{ filter: activeFilter }} />
+                                        <video 
+                                            ref={videoRef} 
+                                            autoPlay 
+                                            playsInline 
+                                            muted 
+                                            className="camera-video-preview" 
+                                            style={{ filter: getFilterString() }} 
+                                        />
                                         <canvas ref={canvasRef} style={{ display: 'none' }} />
                                         
                                         {isCountingDown && (
@@ -364,6 +392,9 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                                                 <button className={`tool-btn ${timer > 0 ? 'active' : ''}`} onClick={() => setTimer(timer === 0 ? 3 : timer === 3 ? 10 : 0)}>
                                                     <span className="timer-label">{timer > 0 ? `${timer}s` : '⏲️'}</span>
                                                 </button>
+                                                <button className={`tool-btn ${beautifyOn ? 'active' : ''}`} onClick={() => setBeautifyOn(!beautifyOn)}>
+                                                    <div className="beauty-icon">✨</div>
+                                                </button>
                                                 <button className="tool-btn" onClick={switchCamera}><RefreshCw size={20} /></button>
                                             </div>
                                         </div>
@@ -388,9 +419,22 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                                     <div className="editor-view">
                                         <div className="media-preview-container">
                                             {mediaType === 'video' ? (
-                                                <video src={capturedVideo!} autoPlay loop muted playsInline className="editor-media-preview" />
+                                                <video 
+                                                    src={capturedVideo!} 
+                                                    autoPlay 
+                                                    loop 
+                                                    muted 
+                                                    playsInline 
+                                                    className="editor-media-preview" 
+                                                    style={{ filter: getFilterString() }}
+                                                />
                                             ) : (
-                                                <img src={capturedImage!} alt="" className="editor-media-preview" />
+                                                <img 
+                                                    src={capturedImage!} 
+                                                    alt="" 
+                                                    className="editor-media-preview" 
+                                                    style={{ filter: getFilterString() }}
+                                                />
                                             )}
                                         </div>
 
