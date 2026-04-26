@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, User, UserPlus, UserCheck, Loader2, Bell, MapPin, Heart, MessageCircle, MoreHorizontal, Share2 } from 'lucide-react';
+import { Search, User, UserPlus, UserCheck, Loader2, Bell, MapPin, Heart, MessageCircle, MoreHorizontal, Share2, Repeat } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
 import { auth } from '../../lib/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -70,7 +70,7 @@ const AutoPlayMedia: React.FC<{ post: any }> = ({ post }) => {
 };
 
 export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewMap }) => {
-    const { searchUsers, followUser, unfollowUser, followingIds, posts, likePost } = usePulseStore();
+    const { searchUsers, followUser, unfollowUser, followingIds, posts, likePost, repostPost } = usePulseStore();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -286,6 +286,12 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                                 )}
                                 {displayedPosts.map(post => (
                                     <div className="post-card" key={`feed-${post.id}`}>
+                                        {(post as any).isRepost && (
+                                            <div className="repost-header">
+                                                <Repeat size={14} />
+                                                <span>{(post as any).user} репостнул(а)</span>
+                                            </div>
+                                        )}
                                         <div className="post-card-header">
                                             <div className="post-user-info" onClick={() => !post.isAnonymous && onViewProfile(post.userId || '')}>
                                                 <img 
@@ -336,6 +342,10 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                                                     </button>
                                                     <button className="post-action-btn" onClick={() => setSharePostId(post.id)}>
                                                         <Share2 size={20} />
+                                                    </button>
+                                                    <button className="post-action-btn" onClick={() => repostPost(post.id)}>
+                                                        <Repeat size={20} />
+                                                        <span>{post.repostCount || 0}</span>
                                                     </button>
                                                 </div>
                                                 <button className="post-view-map-btn" onClick={() => onViewMap && onViewMap()}>

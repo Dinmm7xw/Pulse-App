@@ -267,6 +267,50 @@ export const usePulseStore = () => {
     }
   }, []);
 
+  const repostPost = useCallback(async (postId: string) => {
+    if (!auth.currentUser) return;
+    const userId = auth.currentUser.uid;
+    const postRef = doc(db, "posts", postId);
+
+    try {
+        const { getDoc, updateDoc, increment, arrayUnion } = await import('firebase/firestore');
+        const postSnap = await getDoc(postRef);
+        if (!postSnap.exists()) return;
+        const postData = postSnap.data();
+
+        // 1. Increment repost count on original
+        await updateDoc(postRef, {
+            repostCount: increment(1),
+            repostedBy: arrayUnion(userId)
+        });
+
+        // 2. Create a NEW post that is the repost
+        await addDoc(collection(db, "posts"), {
+            ...postData,
+            id: undefined, // Let Firestore generate new ID
+            userId: userId,
+            user: userProfile.displayName || userProfile.username || 'User',
+            userUsername: userProfile.username || '',
+            userAvatar: userProfile.photoURL || '',
+            isRepost: true,
+            originalPostId: postId,
+            originalUser: postData.user,
+            timestamp: serverTimestamp(),
+            likesCount: 0,
+            likedBy: [],
+            commentsCount: 0,
+            repostCount: 0,
+            repostedBy: []
+        });
+        
+        console.log("🔥 Store: Post reposted successfully!");
+        return true;
+    } catch (error) {
+        console.error("Error reposting:", error);
+        return false;
+    }
+  }, [userProfile]);
+
   const sendMessage = useCallback(async (chatId: string, text: string) => {
     if (!auth.currentUser) return;
     try {
