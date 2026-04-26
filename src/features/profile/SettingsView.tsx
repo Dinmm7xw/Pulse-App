@@ -5,7 +5,7 @@ import {
   Camera, Lock, LogOut, FileText, ChevronLeft, Eye, EyeOff
 } from 'lucide-react';
 import { auth } from '../../lib/firebase';
-import { updateProfile, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
+import { updateProfile, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential, deleteUser } from 'firebase/auth';
 import { usePulseStore } from '../../store/useStore';
 import { uploadMedia } from '../../lib/upload';
 import './SettingsView.css';
@@ -44,12 +44,31 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
   const [showPassword, setShowPassword] = useState(false);
   
   // Notifications
-  const [pushEnabled, setPushEnabled] = useState(true);
-  const [msgNotif, setMsgNotif] = useState(true);
-  const [likeNotif, setLikeNotif] = useState(true);
+  const [pushEnabled, setPushEnabled] = useState((userProfile as any).pushEnabled ?? true);
+  const [msgNotif, setMsgNotif] = useState((userProfile as any).msgNotif ?? true);
+  const [likeNotif, setLikeNotif] = useState((userProfile as any).likeNotif ?? true);
   
   // Privacy
   const [hideLocation, setHideLocation] = useState(userProfile.hideLocation || false);
+
+  const handleComingSoon = () => alert("В разработке. Ожидайте в будущих обновлениях!");
+
+  const handleDeleteAccount = async () => {
+    if(window.confirm("Удалить аккаунт навсегда? Это действие необратимо.")) {
+        try {
+            if (user) {
+                await deleteUser(user);
+                alert("Ваш аккаунт был успешно удален.");
+            }
+        } catch (error: any) {
+            if (error.code === 'auth/requires-recent-login') {
+                alert("Для удаления аккаунта необходимо авторизоваться заново. Пожалуйста, выйдите и войдите снова.");
+            } else {
+                alert("Ошибка: " + error.message);
+            }
+        }
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -269,7 +288,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
                         <div style={{height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden'}}>
                             <div style={{width: '30%', height: '100%', background: 'var(--primary-color)'}} />
                         </div>
-                        <button className="insta-btn" style={{marginTop: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'white'}}>Управление хранилищем</button>
+                        <button className="insta-btn" style={{marginTop: '12px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'white'}} onClick={handleComingSoon}>Управление хранилищем</button>
                     </div>
                   </div>
 
@@ -277,7 +296,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
                     <div className="hero-info">
                       <div className="title" style={{color: 'var(--primary-color)'}}>Pulse Premium</div>
                       <div className="subtitle">Попробуйте классические возможности Pulse с расширенной аналитикой и эксклюзивными темами.</div>
-                      <button className="save-btn" style={{marginTop: '16px', padding: '8px 20px', width: 'auto'}}>Попробовать бесплатно</button>
+                      <button className="save-btn" style={{marginTop: '16px', padding: '8px 20px', width: 'auto'}} onClick={handleComingSoon}>Попробовать бесплатно</button>
                     </div>
                   </div>
                 </>
@@ -338,11 +357,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
                     </div>
 
                     <div className="account-actions-list" style={{padding: '12px'}}>
-                        <button className="account-action-btn-row">
+                        <button className="account-action-btn-row" onClick={handleComingSoon}>
                             <span>Верификация аккаунта</span>
                             <ChevronRight size={18} />
                         </button>
-                        <button className="account-action-btn-row">
+                        <button className="account-action-btn-row" onClick={handleComingSoon}>
                             <span>Скачать мои данные</span>
                             <ChevronRight size={18} />
                         </button>
@@ -350,11 +369,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
 
                     <div className="danger-zone-pulse" style={{margin: '12px', background: 'rgba(255, 77, 86, 0.05)'}}>
                         <h4>Управление аккаунтом</h4>
-                        <button className="delete-pulse-btn" onClick={() => {
-                            if(window.confirm("Удалить аккаунт навсегда? Это действие необратимо.")) {
-                                alert("Заявка на удаление принята.");
-                            }
-                        }}>
+                        <button className="delete-pulse-btn" onClick={handleDeleteAccount}>
                              Удалить учетную запись
                         </button>
                     </div>
@@ -405,7 +420,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
                         <span className="toggle-label">Push-уведомления</span>
                         <p className="toggle-desc">Получать уведомления о новых событиях</p>
                       </div>
-                      <div className={`toggle-switch ${pushEnabled ? 'active' : ''}`} onClick={() => setPushEnabled(!pushEnabled)}>
+                      <div className={`toggle-switch ${pushEnabled ? 'active' : ''}`} onClick={() => {
+                        const val = !pushEnabled;
+                        setPushEnabled(val);
+                        updateUserProfile({ pushEnabled: val } as any);
+                      }}>
                         <div className="toggle-knob" />
                       </div>
                     </div>
@@ -414,7 +433,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
                         <span className="toggle-label">Сообщения</span>
                         <p className="toggle-desc">Уведомлять о новых сообщениях в чатах</p>
                       </div>
-                      <div className={`toggle-switch ${msgNotif ? 'active' : ''}`} onClick={() => setMsgNotif(!msgNotif)}>
+                      <div className={`toggle-switch ${msgNotif ? 'active' : ''}`} onClick={() => {
+                        const val = !msgNotif;
+                        setMsgNotif(val);
+                        updateUserProfile({ msgNotif: val } as any);
+                      }}>
                         <div className="toggle-knob" />
                       </div>
                     </div>
@@ -423,7 +446,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
                         <span className="toggle-label">Лайки</span>
                         <p className="toggle-desc">Уведомлять когда кто-то лайкнул ваш пост</p>
                       </div>
-                      <div className={`toggle-switch ${likeNotif ? 'active' : ''}`} onClick={() => setLikeNotif(!likeNotif)}>
+                      <div className={`toggle-switch ${likeNotif ? 'active' : ''}`} onClick={() => {
+                        const val = !likeNotif;
+                        setLikeNotif(val);
+                        updateUserProfile({ likeNotif: val } as any);
+                      }}>
                         <div className="toggle-knob" />
                       </div>
                     </div>
@@ -440,7 +467,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
                             <span className="toggle-label">Скрыть местоположение</span>
                             <p className="toggle-desc">Другие пользователи не увидят вас на карте</p>
                           </div>
-                          <div className={`toggle-switch ${hideLocation ? 'active' : ''}`} onClick={() => setHideLocation(!hideLocation)}>
+                          <div className={`toggle-switch ${hideLocation ? 'active' : ''}`} onClick={() => {
+                            const val = !hideLocation;
+                            setHideLocation(val);
+                            updateUserProfile({ hideLocation: val });
+                          }}>
                             <div className="toggle-knob" />
                           </div>
                         </div>
