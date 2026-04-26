@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronLeft, Grid, Shield, Heart, MessageCircle, X, UserPlus, UserCheck, MessageSquare } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronLeft, Grid, Shield, Heart, MessageCircle, X, UserPlus, UserCheck, MessageSquare, Share2 } from 'lucide-react';
 import { usePulseStore } from '../../store/useStore';
 import { auth } from '../../lib/firebase';
 import { motion, AnimatePresence } from 'framer-motion';
