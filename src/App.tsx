@@ -16,6 +16,7 @@ import { OtherProfileView } from './features/profile/OtherProfileView';
 import { PrivacyCenter } from './features/profile/PrivacyCenter';
 import { getCityName } from './lib/geo';
 import { Loader2 } from 'lucide-react';
+import { IOSInstallPrompt } from './components/IOSInstallPrompt';
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -152,6 +153,7 @@ function App() {
         onPublish={handlePublish}
       />
 
+      <IOSInstallPrompt />
     </>
   );
 }
