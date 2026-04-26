@@ -177,6 +177,7 @@ export const usePulseStore = () => {
       const docRef = await addDoc(collection(db, "posts"), {
         ...newPost,
         userId: user.uid,
+        userUsername: userProfile.username || '',
         userAvatar: userProfile.photoURL || user.photoURL || '',
         likesCount: 0,
         likedBy: [],

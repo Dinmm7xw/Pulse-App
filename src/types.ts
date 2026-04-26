@@ -12,6 +12,7 @@ export interface Post {
   mediaUrl?: string;
   userId?: string;
   userAvatar?: string;
+  userUsername?: string;
   isAnonymous?: boolean;
   hashtags?: string[];
   privacy?: 'public' | 'friends' | 'private';
