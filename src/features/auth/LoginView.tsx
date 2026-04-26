@@ -113,8 +113,12 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLogin }) => {
                 alert("Этот Email уже зарегистрирован. Попробуйте войти.");
             } else if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
                 alert("Неверный Email или пароль.");
+            } else if (error.code === 'auth/weak-password') {
+                alert("Пароль слишком слабый. Минимум 6 символов.");
+            } else if (error.code === 'auth/invalid-email') {
+                alert("Некорректный формат Email.");
             } else {
-                alert("Ошибка аутентификации. Проверьте данные.");
+                alert("Ошибка аутентификации: " + (error.message || "проверьте данные."));
             }
         } finally {
             setIsLoading(false);

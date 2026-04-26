@@ -56,40 +56,59 @@ export const usePulseStore = () => {
     return () => unsubAuth();
   }, []);
 
-  // Real-time posts listener
+  // Real-time posts listener - only if authenticated
   useEffect(() => {
-    const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const postsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Post[];
-      console.log("🔥 Store: Received posts update", postsData.length);
-      setPosts(postsData);
-    }, (error) => {
-      console.error("🔥 Store: Posts listener error", error);
+    let unsubscribe: () => void;
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+        unsubscribe = onSnapshot(q, (snapshot) => {
+          const postsData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          })) as Post[];
+          setPosts(postsData);
+        }, (error) => {
+          console.error("🔥 Store: Posts listener error", error);
+        });
+      } else {
+        setPosts([]);
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubAuth();
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
-  // Real-time Shouts (8h filter)
+  // Real-time Shouts (8h filter) - only if authenticated
   useEffect(() => {
-    const eightHoursAgo = new Date(Date.now() - 8 * 60 * 60 * 1000);
-    const q = query(
-        collection(db, "shouts"), 
-        where("timestamp", ">=", Timestamp.fromDate(eightHoursAgo))
-    );
+    let unsubscribe: () => void;
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const eightHoursAgo = new Date(Date.now() - 8 * 60 * 60 * 1000);
+        const q = query(
+            collection(db, "shouts"), 
+            where("timestamp", ">=", Timestamp.fromDate(eightHoursAgo))
+        );
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const shoutsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Shout[];
-      setShouts(shoutsData);
+        unsubscribe = onSnapshot(q, (snapshot) => {
+          const shoutsData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          })) as Shout[];
+          setShouts(shoutsData);
+        });
+      } else {
+        setShouts([]);
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubAuth();
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   // Real-time chats listener
