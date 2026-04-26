@@ -53,6 +53,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
     const [recordingTime, setRecordingTime] = useState(0);
     const [activeFilter, setActiveFilter] = useState('none');
     const [beautifyOn, setBeautifyOn] = useState(false);
+    const [activeMask, setActiveMask] = useState<string | null>(null);
     const [timer, setTimer] = useState<0 | 3 | 10>(0);
     const [isCountingDown, setIsCountingDown] = useState(false);
     const [countdown, setCountdown] = useState(0);
@@ -226,6 +227,40 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
         return base || 'none';
     };
 
+    const RenderMask = () => {
+        if (!activeMask) return null;
+        return (
+            <div className="mask-overlay-container">
+                {activeMask === 'hearts' && <div className="mask-emoji hearts">🥰</div>}
+                {activeMask === 'neon' && <div className="mask-neon-frame"></div>}
+                {activeMask === 'stars' && <div className="mask-emoji stars">✨✨</div>}
+                {activeMask === 'cyber' && <div className="mask-cyber-overlay"></div>}
+            </div>
+        );
+    };
+
+    const drawMaskOnCanvas = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+        if (!activeMask) return;
+        ctx.font = `${width * 0.2}px Arial`;
+        ctx.textAlign = 'center';
+        if (activeMask === 'hearts') {
+            ctx.fillText('🥰', width/2, height/2);
+        } else if (activeMask === 'stars') {
+            ctx.fillText('✨✨', width/2, height/2);
+        } else if (activeMask === 'neon') {
+            ctx.strokeStyle = '#00FF94';
+            ctx.lineWidth = 10;
+            ctx.strokeRect(50, 50, width-100, height-100);
+        } else if (activeMask === 'cyber') {
+            ctx.strokeStyle = '#7000FF';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(0, height*0.3); ctx.lineTo(width, height*0.3);
+            ctx.moveTo(0, height*0.7); ctx.lineTo(width, height*0.7);
+            ctx.stroke();
+        }
+    };
+
     const capturePhoto = () => {
         if (!videoRef.current || !canvasRef.current) return;
         const canvas = canvasRef.current;
@@ -235,6 +270,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
         if (ctx) {
             ctx.filter = getFilterString();
             ctx.drawImage(videoRef.current, 0, 0);
+            drawMaskOnCanvas(ctx, canvas.width, canvas.height);
         }
         canvas.toBlob((blob) => {
             if (blob) {
@@ -363,6 +399,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                                             className="camera-video-preview" 
                                             style={{ filter: getFilterString() }} 
                                         />
+                                        <RenderMask />
                                         <canvas ref={canvasRef} style={{ display: 'none' }} />
                                         
                                         {isCountingDown && (
@@ -394,6 +431,13 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                                                 </button>
                                                 <button className={`tool-btn ${beautifyOn ? 'active' : ''}`} onClick={() => setBeautifyOn(!beautifyOn)}>
                                                     <div className="beauty-icon">✨</div>
+                                                </button>
+                                                <button className={`tool-btn ${activeMask ? 'active' : ''}`} onClick={() => {
+                                                    const masks = [null, 'hearts', 'stars', 'neon', 'cyber'];
+                                                    const idx = masks.indexOf(activeMask as any);
+                                                    setActiveMask(masks[(idx + 1) % masks.length] as any);
+                                                }}>
+                                                    🎭
                                                 </button>
                                                 <button className="tool-btn" onClick={switchCamera}><RefreshCw size={20} /></button>
                                             </div>
@@ -436,6 +480,7 @@ export const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClos
                                                     style={{ filter: getFilterString() }}
                                                 />
                                             )}
+                                            <RenderMask />
                                         </div>
 
                                         <div className="editor-sidebar">
