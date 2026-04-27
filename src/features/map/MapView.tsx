@@ -37,8 +37,8 @@ export const MapView: React.FC = () => {
     const [targetRoute, setTargetRoute] = useState<[number, number] | null>(null);
 
     const events = [
-      { id: 'e1', name: 'Футбол: Кайрат vs Астана', type: 'match', pos: [43.238, 76.924], desc: 'Центральный стадион. Начало в 19:00.' },
-      { id: 'e2', name: 'Концерт: Sun Thali', type: 'concert', pos: [43.242, 76.905], desc: 'Дворец Республики. Начало в 20:00.' }
+        { id: 'e1', name: 'Футбол: Кайрат vs Астана', type: 'match', pos: [43.238, 76.924], desc: 'Центральный стадион. Начало в 19:00.' },
+        { id: 'e2', name: 'Концерт: Sun Thali', type: 'concert', pos: [43.242, 76.905], desc: 'Дворец Республики. Начало в 20:00.' }
     ];
 
     useEffect(() => {
@@ -115,7 +115,7 @@ export const MapView: React.FC = () => {
     };
 
     const getShoutIconHtml = (type: string) => {
-        switch(type) {
+        switch (type) {
             case 'love': return '❤️';
             case 'hype': return '⚡';
             case 'meet': return '👥';
@@ -132,7 +132,7 @@ export const MapView: React.FC = () => {
                 zoomControl={false}
                 attributionControl={false}
                 className="leaflet-container-pulse"
-                key={userPos[0]} 
+                key={userPos[0]}
             >
                 <MapHook onMap={setMap} />
                 <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
@@ -143,59 +143,59 @@ export const MapView: React.FC = () => {
                 ))}
 
                 {events.map((e) => (
-                  <Marker 
-                    key={e.id} 
-                    position={e.pos as any} 
-                    icon={L.divIcon({ 
-                        className: 'event-marker', 
-                        html: `<div class="event-circle">${e.type === 'match' ? '⚽' : '🎸'}</div>`, 
-                        iconSize: [35, 35], 
-                        iconAnchor: [17, 17] 
-                    })}
-                  >
-                    <Popup>
-                        <div className="event-popup">
-                            <h3>{e.name}</h3>
-                            <p>{e.desc}</p>
-                            <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-                                <button className="primary-action-mini">Я пойду</button>
-                                <button 
-                                    className="secondary-action-mini" 
-                                    onClick={() => setTargetRoute(e.pos as [number, number])}
-                                >
-                                    Путь
-                                </button>
-                                <button 
-                                    className="route-mini-btn 2gis" 
-                                    onClick={() => open2GIS(e.pos[0], e.pos[1])}
-                                    style={{ background: '#2DBE2C', color: 'white', border: 'none', padding: '0 8px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold' }}
-                                >
-                                    2GIS
-                                </button>
+                    <Marker
+                        key={e.id}
+                        position={e.pos as any}
+                        icon={L.divIcon({
+                            className: 'event-marker',
+                            html: `<div class="event-circle">${e.type === 'match' ? '⚽' : '🎸'}</div>`,
+                            iconSize: [35, 35],
+                            iconAnchor: [17, 17]
+                        })}
+                    >
+                        <Popup>
+                            <div className="event-popup">
+                                <h3>{e.name}</h3>
+                                <p>{e.desc}</p>
+                                <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                                    <button className="primary-action-mini">Я пойду</button>
+                                    <button
+                                        className="secondary-action-mini"
+                                        onClick={() => setTargetRoute(e.pos as [number, number])}
+                                    >
+                                        Путь
+                                    </button>
+                                    <button
+                                        className="route-mini-btn 2gis"
+                                        onClick={() => open2GIS(e.pos[0], e.pos[1])}
+                                        style={{ background: '#2DBE2C', color: 'white', border: 'none', padding: '0 8px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold' }}
+                                    >
+                                        2GIS
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </Popup>
-                  </Marker>
+                        </Popup>
+                    </Marker>
                 ))}
 
                 {/* Render Shouts */}
                 {shouts.map((shout) => (
-                    <Marker 
-                        key={shout.id} 
-                        position={[shout.lat, shout.lng]} 
-                        icon={L.divIcon({ 
-                            className: 'shout-marker', 
-                            html: `<div class="shout-circle">${getShoutIconHtml(shout.type)}</div>`, 
-                            iconSize: [40, 40], 
-                            iconAnchor: [20, 20] 
+                    <Marker
+                        key={shout.id}
+                        position={[shout.lat, shout.lng]}
+                        icon={L.divIcon({
+                            className: 'shout-marker',
+                            html: `<div class="shout-circle">${getShoutIconHtml(shout.type)}</div>`,
+                            iconSize: [40, 40],
+                            iconAnchor: [20, 20]
                         })}
                     >
                         <Popup className="shout-popup">
                             <div className="shout-popup-content">
                                 {shout.isAnonymous ? <strong>Аноним</strong> : <strong>Пользователь</strong>}
                                 <p>{shout.text}</p>
-                                <button 
-                                    className="route-mini-btn primary" 
+                                <button
+                                    className="route-mini-btn primary"
                                     onClick={() => {
                                         updateLocation();
                                         setTargetRoute([shout.lat, shout.lng]);
@@ -222,8 +222,8 @@ export const MapView: React.FC = () => {
                                 <p>Друг • В сети</p>
                                 <div style={{ display: 'flex', gap: '5px', marginTop: '8px' }}>
                                     <button className="chat-mini-btn glass">Чат</button>
-                                    <button 
-                                        className="route-mini-btn primary" 
+                                    <button
+                                        className="route-mini-btn primary"
                                         onClick={() => {
                                             updateLocation();
                                             setTargetRoute([f.lat, f.lng]);
@@ -231,8 +231,8 @@ export const MapView: React.FC = () => {
                                     >
                                         Путь
                                     </button>
-                                    <button 
-                                        className="route-mini-btn 2gis" 
+                                    <button
+                                        className="route-mini-btn 2gis"
                                         onClick={() => open2GIS(f.lat, f.lng)}
                                         style={{ background: '#2DBE2C', color: 'white', border: 'none', padding: '0 8px' }}
                                     >
@@ -253,8 +253,8 @@ export const MapView: React.FC = () => {
                                     <button className="route-mini-btn primary" onClick={() => setTargetRoute(selectedPlace.pos)} style={{ flex: 2 }}>
                                         Путь
                                     </button>
-                                    <button 
-                                        className="route-mini-btn 2gis" 
+                                    <button
+                                        className="route-mini-btn 2gis"
                                         onClick={() => open2GIS(selectedPlace.pos[0], selectedPlace.pos[1])}
                                         style={{ background: '#2DBE2C', color: 'white', border: 'none', flex: 1, borderRadius: '8px', fontWeight: 'bold' }}
                                     >
@@ -272,7 +272,7 @@ export const MapView: React.FC = () => {
             </MapContainer>
 
             {/* Recenter Button */}
-            <button 
+            <button
                 className="map-recenter-btn-pulse"
                 onClick={() => {
                     console.log('Recentering...', userPos);
@@ -283,7 +283,7 @@ export const MapView: React.FC = () => {
             </button>
 
             {/* Add Shout Button */}
-            <button 
+            <button
                 className="map-add-shout-btn"
                 onClick={() => setIsCreateShoutOpen(true)}
             >
@@ -292,7 +292,7 @@ export const MapView: React.FC = () => {
 
             {/* Clear Route Button */}
             {targetRoute && (
-                <button 
+                <button
                     className="map-clear-route-btn"
                     onClick={() => setTargetRoute(null)}
                 >
@@ -304,9 +304,9 @@ export const MapView: React.FC = () => {
             <div className="map-overlay-top">
                 <form className="search-bar glass" onSubmit={handleSearch}>
                     <Search size={18} color="var(--text-dim)" />
-                    <input 
-                        type="text" 
-                        placeholder="Поиск мест, адресов..." 
+                    <input
+                        type="text"
+                        placeholder="Поиск мест, адресов..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
