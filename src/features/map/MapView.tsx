@@ -183,12 +183,15 @@ export const MapView: React.FC = () => {
                                 {shout.isAnonymous ? <strong>Аноним</strong> : <strong>Пользователь</strong>}
                                 <p>{shout.text}</p>
                                 <button 
-                                    className="route-mini-btn glass" 
-                                    onClick={() => setTargetRoute([shout.lat, shout.lng])}
-                                    style={{ marginTop: '8px', width: '100%', border: 'none', color: 'var(--primary-color)', cursor: 'pointer' }}
+                                    className="route-mini-btn primary" 
+                                    onClick={() => {
+                                        updateLocation();
+                                        setTargetRoute([shout.lat, shout.lng]);
+                                    }}
+                                    style={{ marginTop: '8px', width: '100%', border: 'none', color: 'white', cursor: 'pointer' }}
                                 >
                                     <Navigation size={14} style={{ marginRight: '4px' }} />
-                                    Маршрут до крика
+                                    Построить маршрут
                                 </button>
                             </div>
                         </Popup>
@@ -208,8 +211,11 @@ export const MapView: React.FC = () => {
                                 <div style={{ display: 'flex', gap: '5px', marginTop: '8px' }}>
                                     <button className="chat-mini-btn glass">Чат</button>
                                     <button 
-                                        className="route-mini-btn glass" 
-                                        onClick={() => setTargetRoute([f.lat, f.lng])}
+                                        className="route-mini-btn primary" 
+                                        onClick={() => {
+                                            updateLocation();
+                                            setTargetRoute([f.lat, f.lng]);
+                                        }}
                                     >
                                         Путь
                                     </button>
