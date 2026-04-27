@@ -79,8 +79,8 @@ export const MapView: React.FC = () => {
         if (!searchQuery.trim()) return;
         setIsSearching(true);
         try {
-            // Prioritize Kazakhstan (kz) and provide current viewbox if available
-            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5&countrycodes=kz&viewbox=${userPos[1]-1},${userPos[0]+1},${userPos[1]+1},${userPos[0]-1}`;
+            // Strictly limit results to Kazakhstan (kz)
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5&countrycodes=kz`;
             const res = await fetch(url);
             const data = await res.json();
             setSearchResults(data);
