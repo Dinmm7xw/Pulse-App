@@ -23,7 +23,8 @@ import type {
     Comment, 
     Message, 
     UserProfile,
-    Chat
+    Chat,
+    PulseNotification
 } from '../types';
 
 export const usePulseStore = () => {
@@ -37,10 +38,11 @@ export const usePulseStore = () => {
   const [profileLoaded, setProfileLoaded] = useState(false);
   
   // Navigation State
-  const [activeTab, setActiveTab] = useState<'explore' | 'shouts' | 'chats' | 'profile' | 'map'>('explore');
+  const [activeTab, setActiveTab] = useState<string>('explore');
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [friendsLocations, setFriendsLocations] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<PulseNotification[]>([]);
 
   // Sync profile data from Firestore
   useEffect(() => {
@@ -189,7 +191,45 @@ export const usePulseStore = () => {
     };
   }, []);
 
+  // Real-time notifications listener
+  useEffect(() => {
+    let unsubscribe: () => void;
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const q = query(
+          collection(db, "notifications"),
+          where("userId", "==", user.uid),
+          orderBy("timestamp", "desc"),
+          limit(50)
+        );
+        unsubscribe = onSnapshot(q, (snapshot) => {
+          const notifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as PulseNotification[];
+          setNotifications(notifs);
+        });
+      } else {
+        setNotifications([]);
+      }
+    });
+    return () => {
+      unsubAuth();
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
 
+
+
+  const createNotification = useCallback(async (data: Omit<PulseNotification, 'id' | 'timestamp' | 'isRead'>) => {
+    try {
+      if (data.userId === auth.currentUser?.uid) return; // Don't notify yourself
+      await addDoc(collection(db, "notifications"), {
+        ...data,
+        isRead: false,
+        timestamp: serverTimestamp()
+      });
+    } catch (error) {
+      console.error("Error creating notification:", error);
+    }
+  }, []);
 
   const addPost = useCallback(async (newPost: Omit<Post, 'id' | 'timestamp'>) => {
     try {
@@ -254,6 +294,21 @@ export const usePulseStore = () => {
         await updateDoc(doc(db, "posts", postId), {
             commentsCount: increment(1)
         });
+
+        // Create notification for post owner
+        const postSnap = await getDocs(query(collection(db, "posts"), where("__name__", "==", postId)));
+        if (!postSnap.empty) {
+          const postData = postSnap.docs[0].data();
+          createNotification({
+            userId: postData.userId,
+            fromId: auth.currentUser.uid,
+            fromName: userProfile.displayName || userProfile.username || 'User',
+            fromAvatar: userProfile.photoURL || '',
+            type: 'comment',
+            text: `прокомментировал(а) ваш пост: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}"`,
+            postId: postId
+          });
+        }
     } catch (error) {
         console.error("Error adding comment:", error);
     }
@@ -281,6 +336,17 @@ export const usePulseStore = () => {
             await updateDoc(postRef, {
                 likedBy: arrayUnion(userId),
                 likesCount: increment(1)
+            });
+
+            // Create notification for post owner
+            createNotification({
+              userId: postData.userId,
+              fromId: userId,
+              fromName: userProfile.displayName || userProfile.username || 'User',
+              fromAvatar: userProfile.photoURL || '',
+              type: 'like',
+              text: 'лайкнул(а) ваш пост',
+              postId: postId
             });
         }
     } catch (error) {
@@ -480,6 +546,16 @@ export const usePulseStore = () => {
       // 3. Update counts
       await firestoreUpdateDoc(doc(db, "userProfiles", myId), { followingCount: increment(1) });
       await firestoreUpdateDoc(doc(db, "userProfiles", targetUid), { followersCount: increment(1) });
+
+      // Create notification for target user
+      createNotification({
+        userId: targetUid,
+        fromId: myId,
+        fromName: userProfile.displayName || userProfile.username || 'User',
+        fromAvatar: userProfile.photoURL || '',
+        type: 'follow',
+        text: 'подписался(ась) на вас'
+      });
     } catch (error) {
       console.error("Error following user:", error);
     }
@@ -532,6 +608,14 @@ export const usePulseStore = () => {
     return profiles.docs.map(d => ({ id: d.id, ...d.data() }));
   }, []);
 
+  const markNotifRead = useCallback(async (notifId: string) => {
+    try {
+      await firestoreUpdateDoc(doc(db, "notifications", notifId), { isRead: true });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  }, []);
+
   return { 
     posts, 
     shouts,
@@ -566,6 +650,8 @@ export const usePulseStore = () => {
     setActiveChatId,
     friendsLocations,
     fetchFollowers,
-    fetchFollowing
+    fetchFollowing,
+    notifications,
+    markNotifRead
   };
 };

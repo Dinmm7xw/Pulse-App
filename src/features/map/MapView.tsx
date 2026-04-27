@@ -5,7 +5,8 @@ import L from 'leaflet';
 import './MapView.css';
 import { usePulseStore } from '../../store/useStore';
 import { auth } from '../../lib/firebase';
-import { Compass, Search, Plus } from 'lucide-react';
+import { Routing } from './Routing';
+import { Compass, Search, Plus, Navigation, X } from 'lucide-react';
 import { PlaceDetails } from './PlaceDetails';
 import { CreateShoutModal } from './CreateShoutModal';
 
@@ -30,6 +31,10 @@ export const MapView: React.FC = () => {
     const [map, setMap] = useState<L.Map | null>(null);
     const [selectedPlace, setSelectedPlace] = useState<any>(null);
     const [isCreateShoutOpen, setIsCreateShoutOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [targetRoute, setTargetRoute] = useState<[number, number] | null>(null);
 
     const events = [
       { id: 'e1', name: 'Футбол: Кайрат vs Астана', type: 'match', pos: [43.238, 76.924], desc: 'Центральный стадион. Начало в 19:00.' },
@@ -67,6 +72,39 @@ export const MapView: React.FC = () => {
             iconSize: [50, 50],
             iconAnchor: [25, 25],
         });
+    };
+
+    const handleSearch = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!searchQuery.trim()) return;
+        setIsSearching(true);
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=5`);
+            const data = await res.json();
+            setSearchResults(data);
+        } catch (error) {
+            console.error("Search error:", error);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const selectSearchResult = (result: any) => {
+        const pos: [number, number] = [parseFloat(result.lat), parseFloat(result.lon)];
+        map?.flyTo(pos, 16);
+        setSearchResults([]);
+        setSearchQuery(result.display_name);
+        setSelectedPlace({
+            id: result.place_id,
+            name: result.display_name.split(',')[0],
+            desc: result.display_name,
+            pos: pos
+        });
+    };
+
+    const openNavigation = (lat: number, lng: number) => {
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+        window.open(url, '_blank');
     };
 
     const getShoutIconHtml = (type: string) => {
@@ -112,7 +150,15 @@ export const MapView: React.FC = () => {
                         <div className="event-popup">
                             <h3>{e.name}</h3>
                             <p>{e.desc}</p>
-                            <button className="primary-action-mini">Я пойду</button>
+                            <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                                <button className="primary-action-mini">Я пойду</button>
+                                <button 
+                                    className="secondary-action-mini" 
+                                    onClick={() => setTargetRoute(e.pos as [number, number])}
+                                >
+                                    Маршрут
+                                </button>
+                            </div>
                         </div>
                     </Popup>
                   </Marker>
@@ -134,6 +180,14 @@ export const MapView: React.FC = () => {
                             <div className="shout-popup-content">
                                 {shout.isAnonymous ? <strong>Аноним</strong> : <strong>Пользователь</strong>}
                                 <p>{shout.text}</p>
+                                <button 
+                                    className="route-mini-btn glass" 
+                                    onClick={() => setTargetRoute([shout.lat, shout.lng])}
+                                    style={{ marginTop: '8px', width: '100%', border: 'none', color: 'var(--primary-color)', cursor: 'pointer' }}
+                                >
+                                    <Navigation size={14} style={{ marginRight: '4px' }} />
+                                    Маршрут до крика
+                                </button>
                             </div>
                         </Popup>
                     </Marker>
@@ -149,11 +203,37 @@ export const MapView: React.FC = () => {
                             <div className="friend-popup-content">
                                 <strong>{f.displayName}</strong>
                                 <p>Друг • В сети</p>
-                                <button className="chat-mini-btn glass">Чат</button>
+                                <div style={{ display: 'flex', gap: '5px', marginTop: '8px' }}>
+                                    <button className="chat-mini-btn glass">Чат</button>
+                                    <button 
+                                        className="route-mini-btn glass" 
+                                        onClick={() => setTargetRoute([f.lat, f.lng])}
+                                    >
+                                        Путь
+                                    </button>
+                                </div>
                             </div>
                         </Popup>
                     </Marker>
                 ))}
+
+                {selectedPlace && (
+                    <Marker position={selectedPlace.pos} icon={L.divIcon({ className: 'search-marker', html: '<div class="pin">📍</div>', iconSize: [30, 30], iconAnchor: [15, 30] })}>
+                        <Popup>
+                            <div className="search-popup">
+                                <strong>{selectedPlace.name}</strong>
+                                <p>{selectedPlace.desc}</p>
+                                <button className="route-mini-btn primary" onClick={() => setTargetRoute(selectedPlace.pos)} style={{ marginTop: '10px', width: '100%' }}>
+                                    Построить маршрут
+                                </button>
+                            </div>
+                        </Popup>
+                    </Marker>
+                )}
+
+                {targetRoute && (
+                    <Routing from={userPos} to={targetRoute} onReady={() => console.log("Route ready")} />
+                )}
             </MapContainer>
 
             {/* Recenter Button */}
@@ -175,11 +255,42 @@ export const MapView: React.FC = () => {
                 <Plus size={24} color="white" />
             </button>
 
+            {/* Clear Route Button */}
+            {targetRoute && (
+                <button 
+                    className="map-clear-route-btn"
+                    onClick={() => setTargetRoute(null)}
+                >
+                    <X size={20} color="white" />
+                    <span>Отмена пути</span>
+                </button>
+            )}
+
             <div className="map-overlay-top">
-                <div className="search-bar glass">
+                <form className="search-bar glass" onSubmit={handleSearch}>
                     <Search size={18} color="var(--text-dim)" />
-                    <input type="text" placeholder="Поиск мероприятий и друзей..." />
-                </div>
+                    <input 
+                        type="text" 
+                        placeholder="Поиск мест, адресов..." 
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    {isSearching && <div className="loader-mini" />}
+                </form>
+
+                {searchResults.length > 0 && (
+                    <div className="search-results-overlay glass">
+                        {searchResults.map((res) => (
+                            <div key={res.place_id} className="search-result-item" onClick={() => selectSearchResult(res)}>
+                                <div className="res-icon">📍</div>
+                                <div className="res-text">
+                                    <div className="res-name">{res.display_name.split(',')[0]}</div>
+                                    <div className="res-address">{res.display_name}</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             <div className="map-overlay-bottom">

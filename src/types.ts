@@ -110,3 +110,16 @@ export interface UserProfile {
   profileMusicUrl?: string;
   profileMusicName?: string;
 }
+
+export interface PulseNotification {
+  id: string;
+  userId: string; // Target user
+  fromId: string; // Actor
+  fromName: string;
+  fromAvatar: string;
+  type: 'like' | 'comment' | 'follow' | 'repost' | 'system';
+  text: string;
+  postId?: string;
+  isRead: boolean;
+  timestamp: any;
+}

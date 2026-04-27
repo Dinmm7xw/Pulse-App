@@ -70,7 +70,7 @@ const AutoPlayMedia: React.FC<{ post: any }> = ({ post }) => {
 };
 
 export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewMap }) => {
-    const { searchUsers, followUser, unfollowUser, followingIds, posts, likePost, repostPost } = usePulseStore();
+    const { searchUsers, followUser, unfollowUser, followingIds, posts, likePost, repostPost, notifications } = usePulseStore();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState<any[]>([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -79,6 +79,8 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
     const [sharePostId, setSharePostId] = useState<string | null>(null);
     const [activeStoryIndex, setActiveStoryIndex] = useState<number | null>(null);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
+
+    const unreadCount = notifications.filter(n => !n.isRead).length;
 
     useEffect(() => {
         if (!searchQuery.trim()) {
@@ -162,7 +164,7 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                     <div className="header-actions">
                         <button className="action-btn" onClick={() => setIsNotifOpen(true)}>
                             <Bell size={24} />
-                            <div className="notification-dot"></div>
+                            {unreadCount > 0 && <div className="notification-dot">{unreadCount}</div>}
                         </button>
                     </div>
                 </div>
