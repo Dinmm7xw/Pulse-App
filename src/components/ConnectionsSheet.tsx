@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, UserPlus, UserCheck } from 'lucide-react';
+import { X, User } from 'lucide-react';
 import { usePulseStore } from '../store/useStore';
 import './ConnectionsSheet.css';
 
@@ -12,7 +12,7 @@ interface ConnectionsSheetProps {
 }
 
 export const ConnectionsSheet: React.FC<ConnectionsSheetProps> = ({ isOpen, onClose, userId, type }) => {
-    const { fetchUserProfile, followingIds, followUser, unfollowUser, fetchFollowers, fetchFollowing, setViewingUserId } = usePulseStore();
+    const { followingIds, followUser, unfollowUser, fetchFollowers, fetchFollowing, setViewingUserId } = usePulseStore();
     const [users, setUsers] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 

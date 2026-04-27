@@ -6,10 +6,6 @@ import { Phone, Mail, Search as Google, ArrowLeft, Loader2 } from 'lucide-react'
 import { Capacitor } from '@capacitor/core';
 import './LoginView.css';
 
-interface LoginViewProps {
-    // onLogin is handled globally via onAuthStateChanged in useStore
-}
-
 type AuthMode = 'options' | 'phone' | 'otp' | 'email' | 'reset';
 
 export const LoginView: React.FC = () => {

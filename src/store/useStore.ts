@@ -37,7 +37,7 @@ export const usePulseStore = () => {
   const [profileLoaded, setProfileLoaded] = useState(false);
   
   // Navigation State
-  const [activeTab, setActiveTab] = useState<'explore' | 'shouts' | 'chats' | 'profile'>('explore');
+  const [activeTab, setActiveTab] = useState<'explore' | 'shouts' | 'chats' | 'profile' | 'map'>('explore');
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [friendsLocations, setFriendsLocations] = useState<any[]>([]);
@@ -454,7 +454,7 @@ export const usePulseStore = () => {
     try {
         await deleteDoc(doc(db, "posts", postId));
     } catch (error) {
-        console.error("Error deleting post:", error);
+      console.error("Error deleting post:", error);
     }
   }, []);
 

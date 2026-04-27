@@ -18,8 +18,8 @@ const NavItem: React.FC<NavItemProps> = ({ icon: Icon, label, active, onClick })
 
 export const AppLayout: React.FC<{
     children: React.ReactNode;
-    activeTab: string;
-    setActiveTab: (tab: string) => void;
+    activeTab: 'explore' | 'shouts' | 'chats' | 'profile' | 'map';
+    setActiveTab: (tab: 'explore' | 'shouts' | 'chats' | 'profile' | 'map') => void;
     onAddClick?: () => void;
 }> = ({ children, activeTab, setActiveTab, onAddClick }) => {
     return (
