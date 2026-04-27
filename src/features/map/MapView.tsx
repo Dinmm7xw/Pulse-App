@@ -109,6 +109,11 @@ export const MapView: React.FC = () => {
         window.open(url, '_blank');
     };
 
+    const open2GIS = (lat: number, lng: number) => {
+        const url = `https://2gis.kz/search/${lat},${lng}`;
+        window.open(url, '_blank');
+    };
+
     const getShoutIconHtml = (type: string) => {
         switch(type) {
             case 'love': return '❤️';
@@ -158,7 +163,14 @@ export const MapView: React.FC = () => {
                                     className="secondary-action-mini" 
                                     onClick={() => setTargetRoute(e.pos as [number, number])}
                                 >
-                                    Маршрут
+                                    Путь
+                                </button>
+                                <button 
+                                    className="route-mini-btn 2gis" 
+                                    onClick={() => open2GIS(e.pos[0], e.pos[1])}
+                                    style={{ background: '#2DBE2C', color: 'white', border: 'none', padding: '0 8px', borderRadius: '8px', fontSize: '12px', fontWeight: 'bold' }}
+                                >
+                                    2GIS
                                 </button>
                             </div>
                         </div>
@@ -219,6 +231,13 @@ export const MapView: React.FC = () => {
                                     >
                                         Путь
                                     </button>
+                                    <button 
+                                        className="route-mini-btn 2gis" 
+                                        onClick={() => open2GIS(f.lat, f.lng)}
+                                        style={{ background: '#2DBE2C', color: 'white', border: 'none', padding: '0 8px' }}
+                                    >
+                                        2GIS
+                                    </button>
                                 </div>
                             </div>
                         </Popup>
@@ -230,10 +249,18 @@ export const MapView: React.FC = () => {
                         <Popup>
                             <div className="search-popup">
                                 <strong>{selectedPlace.name}</strong>
-                                <p>{selectedPlace.desc}</p>
-                                <button className="route-mini-btn primary" onClick={() => setTargetRoute(selectedPlace.pos)} style={{ marginTop: '10px', width: '100%' }}>
-                                    Построить маршрут
-                                </button>
+                                <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                                    <button className="route-mini-btn primary" onClick={() => setTargetRoute(selectedPlace.pos)} style={{ flex: 2 }}>
+                                        Путь
+                                    </button>
+                                    <button 
+                                        className="route-mini-btn 2gis" 
+                                        onClick={() => open2GIS(selectedPlace.pos[0], selectedPlace.pos[1])}
+                                        style={{ background: '#2DBE2C', color: 'white', border: 'none', flex: 1, borderRadius: '8px', fontWeight: 'bold' }}
+                                    >
+                                        2GIS
+                                    </button>
+                                </div>
                             </div>
                         </Popup>
                     </Marker>
