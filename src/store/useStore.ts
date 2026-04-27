@@ -372,9 +372,11 @@ export const usePulseStore = () => {
         });
 
         // 2. Create a NEW post that is the repost
+        const repostData = { ...postData };
+        delete (repostData as any).id; // Remove ID so Firestore generates a new one
+
         await addDoc(collection(db, "posts"), {
-            ...postData,
-            id: undefined, // Let Firestore generate new ID
+            ...repostData,
             userId: userId,
             user: userProfile.displayName || userProfile.username || 'User',
             userUsername: userProfile.username || '',
