@@ -365,7 +365,13 @@ export const usePulseStore = () => {
         if (!postSnap.exists()) return;
         const postData = postSnap.data();
 
-        // 1. Increment repost count on original
+        // 1. Check if already reposted
+        if (postData.repostedBy?.includes(userId)) {
+            alert('Вы уже репостнули этот пульс!');
+            return false;
+        }
+
+        // 2. Increment repost count on original
         await updateDoc(postRef, {
             repostCount: increment(1),
             repostedBy: arrayUnion(userId)

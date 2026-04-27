@@ -34,8 +34,12 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile, onCl
 
     const filteredPosts = posts.filter(post => {
         if (feedType === 'anon') return post.isAnonymous;
-        if (feedType === 'following') return !post.isAnonymous && followingIds.includes(post.userId || '');
-        return !post.isAnonymous;
+        if (feedType === 'following') {
+            // Show original posts from following AND reposts from following
+            return !post.isAnonymous && followingIds.includes(post.userId || '');
+        }
+        // 'recommend' feed - show ONLY original posts (no duplicates)
+        return !post.isAnonymous && !post.isRepost;
     });
 
     // Initial scroll to target post
