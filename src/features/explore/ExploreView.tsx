@@ -161,8 +161,12 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
 
     // Filter posts based on active tab
     const displayedPosts = recommendedPosts.filter(post => {
+        if (post.isRepost) return false; // Never show duplicate repost docs
+
         if (activeTab === 'following') {
-            return followingIds.includes(post.userId || '');
+            const isFromFollowing = followingIds.includes(post.userId || '');
+            const isRepostedByFollowing = post.repostedBy?.some((uid: string) => followingIds.includes(uid));
+            return isFromFollowing || isRepostedByFollowing;
         }
         if (activeTab === 'near') {
             return !!(post.location || post.city);
@@ -170,6 +174,16 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
         // interests
         return true;
     });
+
+    // Function to get repost attribution text
+    const getRepostAttribution = (post: any) => {
+        if (!post.repostedBy) return null;
+        const followedReposters = post.repostedBy.filter((uid: string) => followingIds.includes(uid));
+        if (followedReposters.length === 0) return null;
+        
+        // This is a bit simplified - ideally we'd have names, but for now we'll say 'Друг' or similar
+        return "Ваши подписки репостнули";
+    };
 
     return (
         <div className="explore-view">
@@ -303,10 +317,10 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
                                 )}
                                 {displayedPosts.map(post => (
                                     <div className="post-card" key={`feed-${post.id}`}>
-                                        {(post as any).isRepost && (
+                                        {getRepostAttribution(post) && (
                                             <div className="repost-header">
                                                 <Repeat size={14} />
-                                                <span>{(post as any).user} репостнул(а)</span>
+                                                <span>{getRepostAttribution(post)}</span>
                                             </div>
                                         )}
                                         <div className="post-card-header">

@@ -33,13 +33,18 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile, onCl
     const feedRef = useRef<HTMLDivElement>(null);
 
     const filteredPosts = posts.filter(post => {
+        if (post.isRepost) return false; // Filter out old duplicate repost documents
+
         if (feedType === 'anon') return post.isAnonymous;
+        
         if (feedType === 'following') {
-            // Show original posts from following AND reposts from following
-            return !post.isAnonymous && followingIds.includes(post.userId || '');
+            const isFromFollowing = followingIds.includes(post.userId || '');
+            const isRepostedByFollowing = post.repostedBy?.some((uid: string) => followingIds.includes(uid));
+            return isFromFollowing || isRepostedByFollowing;
         }
-        // 'recommend' feed - show ONLY original posts (no duplicates)
-        return !post.isAnonymous && !post.isRepost;
+        
+        // 'recommend' feed - show ONLY original posts
+        return !post.isAnonymous;
     });
 
     // Initial scroll to target post
@@ -200,10 +205,10 @@ export const PulseFeed: React.FC<PulseFeedProps> = ({ posts, onViewProfile, onCl
                                         <img src={post.mediaUrl} className="post-media-bg" alt="Post content" />
                                     )
                                 )}
-                                {post.repostedByNames && post.repostedByNames.length > 0 && (
+                                {post.repostedBy?.some((uid: string) => followingIds.includes(uid)) && (
                                     <div className="repost-header-tag glass">
                                         <Repeat size={14} color="#ffcc00" />
-                                        <span>{post.repostedByNames[0]} репостнул(а)</span>
+                                        <span>Репост от ваших друзей</span>
                                     </div>
                                 )}
                                 <div className="feed-overlay">

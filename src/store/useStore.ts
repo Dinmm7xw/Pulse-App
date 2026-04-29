@@ -367,38 +367,17 @@ export const usePulseStore = () => {
 
         // 1. Check if already reposted
         if (postData.repostedBy?.includes(userId)) {
-            alert('Вы уже репостнули этот пульс!');
+            // Optional: allow undoing repost? For now just return
             return false;
         }
 
-        // 2. Increment repost count on original
+        // 2. Increment repost count on original and add user to list
         await updateDoc(postRef, {
             repostCount: increment(1),
             repostedBy: arrayUnion(userId)
         });
-
-        // 2. Create a NEW post that is the repost
-        const repostData = { ...postData };
-        delete (repostData as any).id; // Remove ID so Firestore generates a new one
-
-        await addDoc(collection(db, "posts"), {
-            ...repostData,
-            userId: userId,
-            user: userProfile.displayName || userProfile.username || 'User',
-            userUsername: userProfile.username || '',
-            userAvatar: userProfile.photoURL || '',
-            isRepost: true,
-            originalPostId: postId,
-            originalUser: postData.user,
-            timestamp: serverTimestamp(),
-            likesCount: 0,
-            likedBy: [],
-            commentsCount: 0,
-            repostCount: 0,
-            repostedBy: []
-        });
         
-        console.log("🔥 Store: Post reposted successfully!");
+        console.log("🔥 Store: Post reposted successfully (TikTok style)!");
         return true;
     } catch (error) {
         console.error("Error reposting:", error);
