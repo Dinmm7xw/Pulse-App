@@ -6,6 +6,10 @@ import { Phone, Mail, Search as Google, ArrowLeft, Loader2 } from 'lucide-react'
 import { Capacitor } from '@capacitor/core';
 import './LoginView.css';
 
+interface LoginViewProps {
+    // onLogin is handled globally via onAuthStateChanged in useStore
+}
+
 type AuthMode = 'options' | 'phone' | 'otp' | 'email' | 'reset';
 
 export const LoginView: React.FC = () => {
@@ -24,7 +28,7 @@ export const LoginView: React.FC = () => {
             try {
                 (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
                     'size': 'invisible',
-                    'callback': () => {}
+                    'callback': () => { }
                 });
             } catch (e) {
                 console.error("Recaptcha init error:", e);
@@ -35,7 +39,7 @@ export const LoginView: React.FC = () => {
     const loginWithGoogle = async () => {
         const isNative = Capacitor.isNativePlatform();
         const provider = new GoogleAuthProvider();
-        
+
         try {
             await signInWithPopup(auth, provider);
         } catch (error: any) {
@@ -55,7 +59,7 @@ export const LoginView: React.FC = () => {
             alert("Введите корректный номер телефона (например, +77012345678)");
             return;
         }
-        
+
         setIsLoading(true);
         try {
             const appVerifier = (window as any).recaptchaVerifier;
@@ -79,7 +83,7 @@ export const LoginView: React.FC = () => {
 
     const verifyOtp = async () => {
         if (!otp || otp.length < 6 || !confirmationResult) return;
-        
+
         setIsLoading(true);
         try {
             await confirmationResult.confirm(otp);
@@ -160,7 +164,7 @@ export const LoginView: React.FC = () => {
                             <Google size={20} />
                             <span>Продолжить с Google</span>
                         </button>
-                        
+
                         <div className="divider">
                             <span>или</span>
                         </div>
@@ -182,16 +186,16 @@ export const LoginView: React.FC = () => {
                         <button className="back-btn" onClick={() => setMode('options')}><ArrowLeft size={24} /></button>
                         <h2>Ваш телефон</h2>
                         <p>Мы отправим вам SMS с кодом подтверждения.</p>
-                        
-                        <input 
-                            type="tel" 
-                            className="auth-input" 
-                            placeholder="+7 777 000 00 00" 
+
+                        <input
+                            type="tel"
+                            className="auth-input"
+                            placeholder="+7 777 000 00 00"
                             value={phoneNumber}
                             onChange={(e) => setPhoneNumber(e.target.value)}
                             autoFocus
                         />
-                        
+
                         <button className="auth-submit-btn" onClick={requestOtp} disabled={isLoading}>
                             {isLoading ? <Loader2 className="spin" size={20} /> : 'Получить код'}
                         </button>
@@ -201,20 +205,20 @@ export const LoginView: React.FC = () => {
 
                 {mode === 'otp' && (
                     <div className="auth-step-container">
-                         <button className="back-btn" onClick={() => setMode('phone')}><ArrowLeft size={24} /></button>
+                        <button className="back-btn" onClick={() => setMode('phone')}><ArrowLeft size={24} /></button>
                         <h2>Код из SMS</h2>
                         <p>Введите 6-значный код, отправленный на {phoneNumber}</p>
-                        
-                        <input 
-                            type="number" 
-                            className="auth-input otp-input" 
-                            placeholder="000000" 
+
+                        <input
+                            type="number"
+                            className="auth-input otp-input"
+                            placeholder="000000"
                             value={otp}
                             onChange={(e) => setOtp(e.target.value)}
                             maxLength={6}
                             autoFocus
                         />
-                        
+
                         <button className="auth-submit-btn" onClick={verifyOtp} disabled={isLoading || otp.length < 6}>
                             {isLoading ? <Loader2 className="spin" size={20} /> : 'Подтвердить'}
                         </button>
@@ -226,29 +230,29 @@ export const LoginView: React.FC = () => {
                         <button className="back-btn" onClick={() => setMode('options')}><ArrowLeft size={24} /></button>
                         <h2>{isSignUp ? 'Регистрация' : 'Вход по Email'}</h2>
                         <p>{isSignUp ? 'Создайте новый аккаунт' : 'С возвращением в Pulse!'}</p>
-                        
-                        <input 
-                            type="email" 
-                            className="auth-input" 
-                            placeholder="Ваш Email" 
+
+                        <input
+                            type="email"
+                            className="auth-input"
+                            placeholder="Ваш Email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
 
-                        <input 
-                            type="password" 
-                            className="auth-input" 
-                            placeholder="Пароль (от 6 символов)" 
+                        <input
+                            type="password"
+                            className="auth-input"
+                            placeholder="Пароль (от 6 символов)"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
-                        
+
                         <button className="auth-submit-btn" onClick={handleEmailAuth} disabled={isLoading}>
                             {isLoading ? <Loader2 className="spin" size={20} /> : (isSignUp ? 'Зарегистрироваться' : 'Войти')}
                         </button>
 
                         <div style={{ marginTop: '15px', fontSize: '14px' }}>
-                            <span 
+                            <span
                                 style={{ color: 'white', cursor: 'pointer', textDecoration: 'underline' }}
                                 onClick={() => setMode('reset')}
                             >
@@ -258,7 +262,7 @@ export const LoginView: React.FC = () => {
 
                         <div style={{ marginTop: '20px', fontSize: '14px', color: 'var(--text-dim)' }}>
                             {isSignUp ? 'Уже есть аккаунт?' : 'Нет аккаунта?'}
-                            <span 
+                            <span
                                 style={{ color: 'white', marginLeft: '5px', cursor: 'pointer', textDecoration: 'underline' }}
                                 onClick={() => setIsSignUp(!isSignUp)}
                             >
@@ -273,15 +277,15 @@ export const LoginView: React.FC = () => {
                         <button className="back-btn" onClick={() => setMode('options')}><ArrowLeft size={24} /></button>
                         <h2>Сброс пароля</h2>
                         <p>Введите Email, который вы указывали при регистрации.</p>
-                        
-                        <input 
-                            type="email" 
-                            className="auth-input" 
-                            placeholder="Ваш Email" 
+
+                        <input
+                            type="email"
+                            className="auth-input"
+                            placeholder="Ваш Email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
-                        
+
                         <button className="auth-submit-btn" onClick={handleResetPassword} disabled={isLoading}>
                             {isLoading ? <Loader2 className="spin" size={20} /> : 'Восстановить пароль'}
                         </button>
