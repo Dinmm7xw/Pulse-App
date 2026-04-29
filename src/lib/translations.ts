@@ -34,6 +34,7 @@ export const translations = {
     profile_logout: "Выйти из аккаунта",
     profile_settings: "Настройки",
     profile_language: "Язык приложения",
+    notifications_form: "Уведомления",
 
     // Actions
     action_save: "Сохранить",
@@ -86,6 +87,7 @@ export const translations = {
     profile_logout: "Аккаунттан шығу",
     profile_settings: "Баптаулар",
     profile_language: "Қосымша тілі",
+    notifications_form: "Хабарландырулар",
 
     // Actions
     action_save: "Сақтау",
