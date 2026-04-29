@@ -127,8 +127,23 @@ export const ExploreView: React.FC<ExploreViewProps> = ({ onViewProfile, onViewM
         return true; // public
     });
     
-    // Fake trending stories from posts with media
-    const trendingStories = recommendedPosts.filter(p => p.mediaUrl).slice(0, 6);
+    // Curated trending stories:
+    // 1. Filter out anonymous posts (to show real creators)
+    // 2. Filter posts with media
+    // 3. Ensure unique users (one story per person)
+    // 4. Sort by likesCount (popular first) then timestamp
+    const trendingStories = React.useMemo(() => {
+        const uniqueUsers = new Set();
+        return recommendedPosts
+            .filter(p => !p.isAnonymous && p.mediaUrl)
+            .sort((a, b) => (b.likesCount || 0) - (a.likesCount || 0) || (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0))
+            .filter(p => {
+                if (uniqueUsers.has(p.userId)) return false;
+                uniqueUsers.add(p.userId);
+                return true;
+            })
+            .slice(0, 10); // Show up to 10 unique top creators
+    }, [recommendedPosts]);
 
     const formatTime = (ts: any) => {
         if (!ts) return 'Только что';
