@@ -22,13 +22,13 @@ export const ProfileView: React.FC<{ onOpenSettings: () => void }> = ({ onOpenSe
     const [commentPostId, setCommentPostId] = useState<string | null>(null);
     const [sharePostId, setSharePostId] = useState<string | null>(null);
 
-    // All posts by current user
-    const allUserPosts = useMemo(() => posts.filter(p => p.userId === user?.uid), [posts, user]);
+    // All posts by current user (Originals ONLY)
+    const allUserPosts = useMemo(() => posts.filter(p => p.userId === user?.uid && !p.isRepost), [posts, user]);
     
-    // Public posts for counting and main grid
+    // Public original posts for counting and main grid
     const publicPosts = useMemo(() => allUserPosts.filter(p => !p.isAnonymous), [allUserPosts]);
     
-    // Anonymous posts for the private tab
+    // Anonymous original posts for the private tab
     const anonymousPosts = useMemo(() => allUserPosts.filter(p => p.isAnonymous), [allUserPosts]);
 
     const activePosts = activeTab === 'grid' ? publicPosts : activeTab === 'anonymous' ? anonymousPosts : [];
