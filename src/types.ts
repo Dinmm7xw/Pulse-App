@@ -22,6 +22,8 @@ export interface Post {
   repostCount?: number;
   repostedBy?: string[];
   repostedByNames?: string[];
+  isRepost?: boolean;
+  originalPostId?: string;
 }
 
 export interface Shout {
