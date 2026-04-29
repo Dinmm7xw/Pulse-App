@@ -27,7 +27,7 @@ export const LoginView: React.FC = () => {
         if (mode === 'phone' && !(window as any).recaptchaVerifier) {
             try {
                 (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                    'size': 'invisible',
+                    'size': 'normal',
                     'callback': () => { }
                 });
             } catch (e) {
