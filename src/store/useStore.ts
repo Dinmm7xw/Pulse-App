@@ -36,6 +36,7 @@ export const usePulseStore = () => {
   const [userProfile, setUserProfile] = useState<UserProfile>({ bio: '', username: '', followersCount: 0, followingCount: 0 });
   const [chats, setChats] = useState<Chat[]>([]);
   const [profileLoaded, setProfileLoaded] = useState(false);
+  const [language, setLanguage] = useState<string>((typeof window !== 'undefined' && localStorage.getItem('pulse_lang')) || 'ru');
   
   // Navigation State
   const [activeTab, setActiveTab] = useState<string>('explore');
@@ -639,6 +640,11 @@ export const usePulseStore = () => {
     fetchFollowers,
     fetchFollowing,
     notifications,
-    markNotifRead
+    markNotifRead,
+    language,
+    updateLanguage: (lang: 'ru' | 'kk') => {
+      localStorage.setItem('pulse_lang', lang);
+      setLanguage(lang);
+    }
   };
 };

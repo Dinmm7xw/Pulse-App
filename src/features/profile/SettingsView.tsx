@@ -12,6 +12,7 @@ import { uploadMedia } from '../../lib/upload';
 import { CloudArchiveModal } from './CloudArchiveModal';
 import { MusicPicker } from '../../components/MusicPicker/MusicPicker';
 import type { ItunesTrack } from '../../services/itunes';
+import { translations } from '../../lib/translations';
 import './SettingsView.css';
 
 interface SettingsViewProps {
@@ -28,7 +29,9 @@ export const NEUTRAL_AVATAR = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.or
 export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onOpenPrivacy }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab | null>(null);
   const [showCategoryList, setShowCategoryList] = useState(true);
-  const { userProfile, updateUserProfile, fetchUserPosts } = usePulseStore();
+  const { userProfile, updateUserProfile, fetchUserPosts, language, updateLanguage } = usePulseStore();
+  const t = translations[language as keyof typeof translations] || translations.ru;
+
   const user = auth.currentUser;
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -192,11 +195,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
   };
 
   const navItems = [
-    { id: 'main', icon: <User size={18} />, label: 'Главная' },
-    { id: 'profile', icon: <User size={18} />, label: 'Мой профиль' },
+    { id: 'main', icon: <User size={18} />, label: t.nav_profile },
+    { id: 'profile', icon: <User size={18} />, label: t.profile_edit },
     { id: 'account', icon: <FileText size={18} />, label: 'Учётная запись' },
     { id: 'security', icon: <Lock size={18} />, label: 'Безопасность' },
-    { id: 'notifications', icon: <Bell size={18} />, label: 'Уведомления' },
+    { id: 'notifications', icon: <Bell size={18} />, label: t.notifications_form || 'Уведомления' },
     { id: 'privacy', icon: <Shield size={18} />, label: 'Приватность' },
     { id: 'terms', icon: <FileText size={18} />, label: 'Правила и условия' },
     { id: 'about', icon: <HelpCircle size={18} />, label: 'О программе' },
@@ -296,6 +299,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ isOpen, onClose, onO
                   </div>
 
                   <div className="settings-group-card">
+                    <div className="settings-list-item">
+                      <div className="item-icon"><FileText size={20} /></div>
+                      <div className="item-info">
+                        <span className="label">{t.profile_language}</span>
+                        <div className="lang-selector-pills">
+                           <button className={`lang-pill ${language === 'ru' ? 'active' : ''}`} onClick={() => updateLanguage('ru')}>Русский</button>
+                           <button className={`lang-pill ${language === 'kk' ? 'active' : ''}`} onClick={() => updateLanguage('kk')}>Қазақша</button>
+                        </div>
+                      </div>
+                    </div>
                     <div className="settings-list-item" onClick={() => setActiveTab('notifications')}>
                       <div className="item-icon"><Bell size={20} /></div>
                       <div className="item-info">

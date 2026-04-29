@@ -1,5 +1,7 @@
 import React from 'react';
 import { Map, Search, Plus, MessageCircle, User } from 'lucide-react';
+import { usePulseStore } from '../store/useStore';
+import { translations } from '../lib/translations';
 import './AppLayout.css';
 
 interface NavItemProps {
@@ -22,6 +24,9 @@ export const AppLayout: React.FC<{
     setActiveTab: (tab: string) => void;
     onAddClick?: () => void;
 }> = ({ children, activeTab, setActiveTab, onAddClick }) => {
+    const { language } = usePulseStore();
+    const t = translations[language as keyof typeof translations] || translations.ru;
+
     return (
         <div className="app-container">
             <main className="main-content">
@@ -31,13 +36,13 @@ export const AppLayout: React.FC<{
             <nav className="bottom-nav glass">
                 <NavItem
                     icon={Map}
-                    label="Карта"
+                    label={t.nav_map}
                     active={activeTab === 'map'}
                     onClick={() => setActiveTab('map')}
                 />
                 <NavItem
                     icon={Search}
-                    label="Поиск"
+                    label={t.nav_explore}
                     active={activeTab === 'explore'}
                     onClick={() => setActiveTab('explore')}
                 />
@@ -46,13 +51,13 @@ export const AppLayout: React.FC<{
                 </div>
                 <NavItem
                     icon={MessageCircle}
-                    label="Чаты"
+                    label={t.nav_chats}
                     active={activeTab === 'chats'}
                     onClick={() => setActiveTab('chats')}
                 />
                 <NavItem
                     icon={User}
-                    label="Профиль"
+                    label={t.nav_profile}
                     active={activeTab === 'profile'}
                     onClick={() => setActiveTab('profile')}
                 />
